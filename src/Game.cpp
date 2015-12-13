@@ -44,8 +44,16 @@ void Game::update()
         {
             if (event.key.code == Keyboard::Escape)
                 window->close();
-            if (event.key.code == Keyboard::Return)
-                phase = phase == DEORBIT ? ORBIT : DEORBIT;
+            if (event.key.code == Keyboard::Num1)
+                phase = MENU;
+            if (event.key.code == Keyboard::Num2)
+            {
+                phase = ORBIT;
+            }
+            if (event.key.code == Keyboard::Num3)
+                phase = DEORBIT;
+            if (event.key.code == Keyboard::Num4)
+                phase = LANDED;
             if (event.key.code == Keyboard::Space)
                 sfx.at(0)->play();
         }
@@ -84,19 +92,44 @@ void Game::update()
         phase = updateReturn;
     //if (updateReturn == 3)
 
+    viewPos = lander.getPosition();
 
     int maxOffset = 5000;
     //double viewLanderOffset = maxOffset + surfaceGenerator.getHeight(lander.getPosition().x) / lander.getPosition().y * maxOffset;
     double viewLanderOffset = maxOffset + 20000 / lander.getPosition().y * maxOffset;
-    viewLanderOffset = viewLanderOffset > maxOffset ? maxOffset : viewLanderOffset;
-
-    viewPos = Vector2f(lander.getPosition().x, lander.getPosition().y + viewLanderOffset);
+    viewLanderOffset = (viewLanderOffset > maxOffset ? maxOffset : viewLanderOffset);
 
     if (phase == MENU)
     {
-        viewPos.x = viewPos.x + 500 * zoom;
-        viewPos.y = viewPos.y + 200 * zoom;
+        viewPos.x = viewPos.x + viewPosOffset.x * zoom;
+        viewPos.y = viewPos.y + viewPosOffset.y * zoom;
     }
+    else if (phase == ORBIT)
+    {
+        if (lastPhase == MENU)
+            sfx.at(20 + randint(0, 3))->play();
+
+        viewPos.x = viewPos.x + viewPosOffset.x * zoom;
+        viewPos.y = viewPos.y + viewPosOffset.y * zoom;
+
+        double transitionx = 500 * dt / 10;
+        double transitiony = 300 * dt / 10;
+        viewPosOffset.x = viewPosOffset.x - transitionx < 0 ? 0 : viewPosOffset.x - transitionx;
+        viewPosOffset.y = viewPosOffset.y - transitiony < 0 ? 0 : viewPosOffset.y - transitiony;
+    }
+    else if (phase == LANDED || phase == DEORBIT)
+    {
+        viewPos = lander.getPosition();
+    }
+
+    if (abs(zoom - zoomGoal) < 0.05)
+        zoom = zoomGoal;
+    if (zoom < zoomGoal)
+        zoom += 0.05;
+    if (zoom > zoomGoal)
+        zoom -= 0.05;
+
+    lastPhase = phase;
 
     frame++;
 }
@@ -108,23 +141,6 @@ void Game::draw()
     view.setSize(Vector2f(windowWidth, windowHeight));
     view.setCenter(viewPos);
     view.zoom(zoom);
-
-    if (phase == MENU)
-    {
-        Sprite menuSprite;
-        menuSprite.setTexture(textures.at(2));
-        menuSprite.setPosition(viewPos);
-        menuSprite.setScale(zoom, zoom);
-        menuSprite.setOrigin(128, 128);
-        window->draw(menuSprite);
-    }
-
-    int maxZoom = 20; int minZoom =  4;
-    int maxAlt = 3e4; int minAlt = 2e4;
-    zoom = ((-lander.getPosition().y - minAlt) / (maxAlt - minAlt)) * (maxZoom - minZoom);
-    zoom = zoom < minZoom ? minZoom : zoom;
-    zoom = zoom > maxZoom ? maxZoom : zoom;
-
     window->setView(view);
 
     //Vector2<double> surfacePosition = Vector2<double>(lander.getPosition().x - windowWidth / 2, lander.getPosition().y + windowHeight / 2);
@@ -134,6 +150,26 @@ void Game::draw()
     surfacePosition.y = 0;
     //std::cout << surfacePosition.x << " " << surfacePosition.y << "\n";
     surfaceGenerator.drawSurface(window, surfacePosition);
+
+    if (phase == MENU)
+    {
+        Sprite menuSprite;
+        menuSprite.setTexture(textures.at(2));
+        menuSprite.setPosition(viewPos);
+        menuSprite.setScale(zoom, zoom);
+        menuSprite.setOrigin(128, 128);
+        window->draw(menuSprite);
+        zoomGoal = zoom;
+    }
+
+    if (phase == DEORBIT || phase == ORBIT || phase == LANDED)
+    {
+        int maxZoom = 30; int minZoom =  4;
+        int maxAlt = 3e4; int minAlt = 2e4;
+        zoomGoal = ((-lander.getPosition().y - minAlt) / (maxAlt - minAlt)) * (maxZoom - minZoom);
+        zoomGoal = zoomGoal < minZoom ? minZoom : zoomGoal;
+        zoomGoal = zoomGoal > maxZoom ? maxZoom : zoomGoal;
+    }
 
     lander.draw(window, &textures, phase);
 

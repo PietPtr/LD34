@@ -28,11 +28,19 @@ int Lander::update(double dt, int phase, SurfaceGenerator* surfaceGenerator)
     this->dt = dt;
     this->totalTime += dt;
 
-    if (phase == 1 || phase == 0)
+    if (phase == 0)
+        return phaseMenu();
+    else if (phase == 1)
         return phaseOrbit();
     else if (phase == 2)
         return phaseDeorbit(surfaceGenerator);
     return -1;
+}
+
+int Lander::phaseMenu()
+{
+    phaseOrbit();
+    return 0;
 }
 
 int Lander::phaseOrbit()
@@ -50,7 +58,7 @@ int Lander::phaseOrbit()
     }*/
     //std::cout << (*sfx).at(2)->sound.getStatus() << "\n";
 
-    return 0;
+    return 1;
 }
 
 int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
@@ -108,8 +116,10 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
     if (altitude < 1000)
         throttle = 5.0;
     if (altitude < 500)
-        throttle = 15.0;
-    if (altitude < 100)
+        throttle = 10.0;
+    if (altitude < 100 && altitude > 0)
+        throttle = altitude / 100;
+    if (altitude < 0)
         throttle = 0;
     if (altitude >= 4000)
         throttle = 1.0;

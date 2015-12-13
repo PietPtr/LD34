@@ -34,9 +34,10 @@ void SurfaceGenerator::drawSurface(RenderWindow* window, Vector2<double> positio
         surfaceSlice.setPointCount(4);
         surfaceSlice.setFillColor(Color(150,150,150));
 
+        int sliceWidth = index == 4096 ? 1000 : metersPerValue;
         surfaceSlice.setPoint(0, Vector2f(0, baseHeight + surface[index] * surfaceHeight));
-        surfaceSlice.setPoint(1, Vector2f(metersPerValue, baseHeight + surface[index + 1] * surfaceHeight));
-        surfaceSlice.setPoint(2, Vector2f(metersPerValue, 0));
+        surfaceSlice.setPoint(1, Vector2f(sliceWidth, baseHeight + surface[index + 1] * surfaceHeight));
+        surfaceSlice.setPoint(2, Vector2f(sliceWidth, 0));
         surfaceSlice.setPoint(3, Vector2f(0, 0));
 
         surfaceSlice.setPosition((position.x + metersPerValue * i), position.y);
