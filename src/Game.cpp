@@ -16,7 +16,7 @@ void Game::initialize()
     loadTextures(textureFileNames);
 
     LanderSettings landerSettings;
-    landerSettings.position = Vector2<double>(0, -32000);
+    landerSettings.position = Vector2<double>(16 * 0, -32000);
     landerSettings.velocity = Vector2<double>(1, 0);
     landerSettings.speed = 1150;
     landerSettings.sfx = &sfx;
@@ -214,6 +214,15 @@ void Game::draw()
         attitudeMeter.setColor(Color(0, 200, 0, hudtransparency));
         attitudeMeter.setOrigin(Vector2f(-2, -2));
         window->draw(attitudeMeter);
+
+        Sprite attitudeLM;
+        attitudeLM.setTexture(textures.at(7));
+        attitudeLM.setPosition(viewPos + Vector2f(-windowWidth / 2.0 + 80, -windowHeight / 2.0 + 80) * (float)zoom);
+        attitudeLM.setScale(zoom, zoom);
+        attitudeLM.setColor(Color(0, 200, 0, hudtransparency));
+        attitudeLM.setOrigin(Vector2f(80, 80));
+        attitudeLM.setRotation(lander.getRotation());
+        window->draw(attitudeLM);
     }
 
     if (phase == DEORBIT)
@@ -228,15 +237,6 @@ void Game::draw()
         altitudeLM.setColor(Color(0, 200, 0, hudtransparency));
         altitudeLM.setOrigin(46, 0);
         window->draw(altitudeLM);
-
-        Sprite attitudeLM;
-        attitudeLM.setTexture(textures.at(7));
-        attitudeLM.setPosition(viewPos + Vector2f(-windowWidth / 2.0 + 80, -windowHeight / 2.0 + 80) * (float)zoom);
-        attitudeLM.setScale(zoom, zoom);
-        attitudeLM.setColor(Color(0, 200, 0, hudtransparency));
-        attitudeLM.setOrigin(Vector2f(80, 80));
-        attitudeLM.setRotation(lander.getRotation());
-        window->draw(attitudeLM);
     }
 
     lander.draw(window, &textures, phase);

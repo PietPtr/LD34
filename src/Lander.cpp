@@ -138,6 +138,10 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
 
     //std::cout << totalTime - lastSoundPlayed << "\n";
 
+    if (Keyboard::isKeyPressed(Keyboard::S))
+        position.y = -32000;
+    throttle = 0;
+
     return 2;
 }
 
@@ -183,7 +187,7 @@ int Lander::checkCollision(SurfaceGenerator* surfaceGenerator)
     hitpoints[1].x =  120 * cs - 126 * sn;
     hitpoints[1].y =  120 * sn + 126 * cs;
 
-    std::cout << "Altitude: " << altitude << "\n";
+    //std::cout << "Altitude: " << altitude << "\n";
 
     // for
     for (int i = 0; i < 2; i++)
@@ -191,13 +195,17 @@ int Lander::checkCollision(SurfaceGenerator* surfaceGenerator)
         // find surface points under hitpoints
         int index = (int)((position.x + hitpoints[i].x) / 16.0) % 4097;
         index = index > 4097 ? 0 : index;
+
+        std::cout << index << "\n";
         double baseHeight = surfaceGenerator->getBaseHeight();
         double surfaceHeight = surfaceGenerator->getSurfaceHeight();
-        double height1 = baseHeight + surfaceGenerator->surface[index] * surfaceHeight;         //maybe something is wrong here
-        double height2 = baseHeight + surfaceGenerator->surface[index + 1] * surfaceHeight;
+        //double height1 = baseHeight + surfaceGenerator->surface[index] * surfaceHeight;         //maybe something is wrong here
+        //double height2 = baseHeight + surfaceGenerator->surface[index + 1] * surfaceHeight;
+        double height1 = surfaceGenerator->getHeight(position.x + hitpoints[i].x);
+        double height2 = surfaceGenerator->getHeight(position.x + hitpoints[i].x + 16);
 
         // create line function between surface points
-        double x1 = index * 16;
+        double x1 = (index + (int)((position.x + hitpoints[i].x) / 4097.0 / 16)) * 16;
         double y1 = height1;
         double y2 = height2;
         double a = (abs(height1 - height2)) / 16.0;
@@ -205,11 +213,11 @@ int Lander::checkCollision(SurfaceGenerator* surfaceGenerator)
         //std::cout << "y = " << a << "x + " << b << "    ";
 
         // check hitpoints.y < line(hitpoints.x)
-        if (-position.y + hitpoints[i].y < a * (position.x + hitpoints[i].x) + b)
+        if (-position.y - hitpoints[i].y < a * (position.x + hitpoints[i].x) + b)
         {
             //std::cout << "Lunar contact!" << "\n";
             std::cout << i << ": " << -position.y + hitpoints[i].y << " < " << a * (position.x + hitpoints[i].x) + b
-                      << ", pos.y: " << -position.y << ", h1: " << height1 << ", h2: " << height2 << ", get: " << surfaceGenerator->getHeight(position.x) << "\n";
+                      << ", pos.y: " << -position.y << ", h1: " << height1 << ", h2: " << height2 << ", get: " << surfaceGenerator->getHeight(position.x + hitpoints[i].x) << "\n";
             if ((int)rotation % 360 > 270 || (int)rotation % 360 < 90)
                 (*sfx).at(2)->play();
             else
@@ -219,6 +227,7 @@ int Lander::checkCollision(SurfaceGenerator* surfaceGenerator)
 
         // true -> set phase touchdown
     }
+    std::cout << "\n";
     return 0;
 }
 
@@ -254,6 +263,33 @@ void Lander::draw(RenderWindow* window, std::vector<Texture>* textures, int phas
     };
 
     window->draw(line, 2, sf::Lines);*/
+
+    /*double cs = cos(rotation * (PI/180));
+    double sn = sin(rotation * (PI/180));
+    Vector2i hitpoints[2];
+    hitpoints[0].x = -120 * cs - 126 * sn;
+    hitpoints[0].y = -(-120 * sn + 126 * cs);
+    hitpoints[1].x =  120 * cs - 126 * sn;
+    hitpoints[1].y =  -(120 * sn + 126 * cs);
+
+    double radius = 50;
+    CircleShape hitpoint(radius);
+    hitpoint.setFillColor(Color(0, 200, 200, 155));
+    hitpoint.setPosition(Vector2f(position.x + hitpoints[0].x, position.y + hitpoints[0].y));
+    hitpoint.setOrigin(Vector2f(radius, radius));
+    window->draw(hitpoint);
+
+    CircleShape hitpoint2(radius);
+    hitpoint2.setFillColor(Color(200, 0, 0, 155));
+    hitpoint2.setPosition(Vector2f(position.x + hitpoints[1].x, position.y + hitpoints[1].y));
+    hitpoint2.setOrigin(Vector2f(radius, radius));
+    window->draw(hitpoint2);
+
+    CircleShape pos(radius);
+    pos.setFillColor(Color(0, 200, 0, 155));
+    pos.setPosition(Vector2f(position.x, position.y));
+    pos.setOrigin(Vector2f(radius, radius));
+    window->draw(pos);*/
 }
 
 double Lander::calcGravitationForce()

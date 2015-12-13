@@ -41,7 +41,7 @@ class Lander
         Vector2<double> thrust;
         double speed;                 // in meters per second
         double gravitationForce;
-        double rotation = 270;
+        double rotation = 0;
         double angularMomentum = 0;
         double mass = 15200; // kg
         double dt;
