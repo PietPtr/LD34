@@ -29,6 +29,8 @@ int Lander::update(double dt, int phase, SurfaceGenerator* surfaceGenerator)
     this->totalTime += dt;
     this->phase = phase;
 
+    altitude = -position.y - surfaceGenerator->getHeight(position.x);
+
     if (phase == 0)
         return phaseMenu();
     else if (phase == 1)
@@ -124,7 +126,7 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
     if (altitude < 2000)
         throttle = 3.0;
     if (altitude < 1000)
-        throttle = 5.0;
+        throttle = 3.0;
     if (altitude < 500)
         throttle = 6.0;
     if (altitude < 100 && altitude > 0)
@@ -136,8 +138,10 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
 
     //std::cout << previousThrottle << " " << throttle << "\n";
 
-    if ((totalTime - lastSoundPlayed > randint(2, 5, lastSoundPlayed)) && totalTime - lastSoundPlayed > 2 && !isSoundPlaying())
+    if ((totalTime - lastSoundPlayed > randint(2, 5, lastSoundPlayed)) && totalTime - lastSoundPlayed > 2)
         playAtmosphericSound();
+
+    //std::cout << "Altitude: " << altitude << "\n";
 
     //std::cout << totalTime - lastSoundPlayed << "\n";
 
@@ -161,27 +165,23 @@ int Lander::phaseTouchdown(SurfaceGenerator* surfaceGenerator)
 
     double cs = cos(rotation * (PI/180));
     double sn = sin(rotation * (PI/180));
+    double tcs = cos(touchdownAngle * (PI/180));
+    double tsn = sin(touchdownAngle * (PI/180));
     if (touchdownStrut == 0)
     {
-        hitpoints[1].x = 120 + ((240) * cs - (0) * sn);
-        hitpoints[1].y = 126 + ((240) * sn + (0) * cs);
+        hitpoints[1].x = -120 * tcs - 126 * tsn + (240 * cs - 0 * sn);
+        hitpoints[1].y = -120 * tsn + 126 * tcs + (240 * sn + 0 * cs);
     }
     if (touchdownStrut == 1)
     {
-        hitpoints[0].x = -256 * cs - 0 * sn;
-        hitpoints[0].y = -256 * sn + 0 * cs;
+        hitpoints[0].x = 120 * tcs - 126 * tsn + (-240 * cs - 0 * sn);
+        hitpoints[0].y = 120 * tsn + 126 * tcs + (-240 * sn + 0 * cs);
     }
 
     if (touchdownStrut == 0 && !checkCollision(hitpoints[1], surfaceGenerator))
-        rotation++;
+        rotation += fabs(angularMomentum * dt);
     if (touchdownStrut == 1 && !checkCollision(hitpoints[0], surfaceGenerator))
-        rotation--;
-
-    std::cout << checkCollision(hitpoints[1], surfaceGenerator) << "\n";
-
-    if (Keyboard::isKeyPressed(Keyboard::Right))
-        rotation++;
-
+        rotation -= fabs(angularMomentum * dt);
 
     return 3;
 }
@@ -196,12 +196,10 @@ void Lander::playAtmosphericSound()
     }
     else if (altitude < 8000)
     {
-        (*sfx).at(9 + randint(0, 2, altitude))->play();
+        (*sfx).at(9 + heightSound)->play();
+        heightSound++;
     }
-    else if (altitude < 5000)
-    {
-        (*sfx).at(12 + randint(0, 6, altitude))->play();
-    }
+    heightSound = heightSound > 9 ? 0 : heightSound;
 
     lastSoundPlayed = totalTime;
 }
@@ -236,8 +234,13 @@ int Lander::checkLanded(SurfaceGenerator* surfaceGenerator)
         if (checkCollision(hitpoints[i], surfaceGenerator))
         {
             touchdownStrut = i;
+            touchdownAngle = rotation;
+            if (angularMomentum < 30)
+                angularMomentum = 30;
 
-            if ((int)rotation % 360 > 270 && (int)rotation % 360 < 90)
+            throttle = 0;
+
+            if ((int)rotation % 360 > 270 || (int)rotation % 360 < 90)
                 (*sfx).at(2)->play();
             else
                 (*sfx).at(19)->play();
@@ -389,7 +392,7 @@ void Lander::draw(RenderWindow* window, std::vector<Texture>* textures, int phas
 
 
 
-    double radius = 50;
+    /*double radius = 50;
     CircleShape hitpoint(radius);
     hitpoint.setFillColor(Color(0, 200, 200, 155));
     hitpoint.setPosition(Vector2f(position.x + hitpoints[0].x, position.y + hitpoints[0].y));
@@ -406,7 +409,7 @@ void Lander::draw(RenderWindow* window, std::vector<Texture>* textures, int phas
     pos.setFillColor(Color(0, 200, 0, 155));
     pos.setPosition(Vector2f(position.x, position.y));
     pos.setOrigin(Vector2f(radius, radius));
-    window->draw(pos);
+    window->draw(pos);*/
 }
 
 double Lander::calcGravitationForce()

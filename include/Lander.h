@@ -33,6 +33,7 @@ class Lander
         Vector2f getPosition() { return (Vector2f)(position); }
         double getAltitude() { return altitude; }
         double getRotation() { return rotation; }
+        double getThrottle() { return throttle;}
     protected:
     private:
         Vector2<double> acceleration; // m/s^2
@@ -43,7 +44,7 @@ class Lander
         Vector2i hitpoints[2];
         double speed;                 // in meters per second
         double gravitationForce;
-        double rotation = 270;
+        double rotation = 0;
         double angularMomentum = 0;
         double mass = 15200; // kg
         double dt;
@@ -53,9 +54,11 @@ class Lander
         double throttle = 24685/45000;
         double altitude = 0;
         double lastSoundPlayed = 0; // time
+        double touchdownAngle = 0;
         int touchdownStrut = -1;
         double stableRotation = 0;
         int phase;
+        int heightSound = 0;
 
         LanderSettings settings;
         std::vector<Audio*>* sfx;

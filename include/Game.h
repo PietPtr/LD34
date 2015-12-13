@@ -33,14 +33,14 @@ class Game
         void loadAudio(std::vector<std::string> fileNames);
         void loadTextures(std::vector<std::string> fileNames);
 
-        int randint(int low, int high, int seed);
-        int randint(int low, int high);
+        int randomint(int low, int high);
     protected:
     private:
         RenderWindow* window;
         View view;
-        double zoom = 25;
-        double zoomGoal = zoom;
+        const double STARTZOOM = 30;
+        double zoom = STARTZOOM;
+        double zoomGoal = STARTZOOM;
 
         int windowWidth = 1280;
         int windowHeight = 720;
@@ -62,7 +62,8 @@ class Game
                                                   "go-for-landing1.wav", "go-for-landing2.wav", "go-for-pdi1.wav",
                                                   "go-for-pdi2.wav" };
         std::vector<std::string> textureFileNames { "lander.png", "booster.png", "menu.png", "select.png",
-                                                  "altitude.png", "altitude-LM.png", "attitude.png", "attitude-LM.png" };
+                                                  "altitude.png", "altitude-LM.png", "attitude.png", "attitude-LM.png",
+                                                  "thrust.png" };
 
         std::vector<Audio*> sfx;
         std::vector<Texture> textures;
@@ -78,6 +79,8 @@ class Game
         int mission = 11;
 
         int hudtransparency = 200;
+
+        int goTrack = 21;
 
         bool choice = false;
 };

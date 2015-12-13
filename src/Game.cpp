@@ -5,6 +5,8 @@
 
 using namespace sf;
 
+int randint(int low, int high, int seed);
+
 Game::Game(RenderWindow* _window)
 {
     window = _window;
@@ -16,7 +18,7 @@ void Game::initialize()
     loadTextures(textureFileNames);
 
     LanderSettings landerSettings;
-    landerSettings.position = Vector2<double>(16 * 2048, -30000);
+    landerSettings.position = Vector2<double>(16 * 2048, -32000);
     landerSettings.velocity = Vector2<double>(1, 0);
     landerSettings.speed = 1150;
     landerSettings.sfx = &sfx;
@@ -31,6 +33,7 @@ void Game::initialize()
 
     sfx[NOISE]->loop(true);
     sfx[NOISE]->play();
+
 
 }
 
@@ -87,6 +90,15 @@ void Game::update()
         }
     }
 
+    frameTime = clock.restart();
+    totalTime += frameTime;
+
+    if (frame == 1)
+    {
+        goTrack = 21 + randomint(0, 1) * 2;
+        std::cout << goTrack << "\n";
+    }
+
     //Manual view control
     double viewMoveSpeed = 20;
     if (Keyboard::isKeyPressed(Keyboard::Home))
@@ -98,8 +110,6 @@ void Game::update()
     if (Keyboard::isKeyPressed(Keyboard::PageDown))
         viewPos.x += viewMoveSpeed;
 
-    frameTime = clock.restart();
-    totalTime += frameTime;
 
     double dt = frameTime.asSeconds() * 1;
 
@@ -123,17 +133,18 @@ void Game::update()
     else if (phase == ORBIT)
     {
         if (lastPhase == MENU)
-            sfx.at(20 + randint(0, 1) * 2 + 1)->play();
+            sfx.at(goTrack)->play();
+            //sfx.at(20 + randint(0, 1, (int)(totalTime.asSeconds())) * 2 + 1)->play();
 
         viewPos.x = viewPos.x + viewPosOffset.x * zoom;
         viewPos.y = viewPos.y + viewPosOffset.y * zoom;
 
-        double transitionx = 500 * dt / 14;
-        double transitiony = 300 * dt / 14;
+        double transitionx = 500 * dt / 4;
+        double transitiony = 300 * dt / 4;
         viewPosOffset.x = viewPosOffset.x - transitionx < 0 ? 0 : viewPosOffset.x - transitionx;
         viewPosOffset.y = viewPosOffset.y - transitiony < 0 ? 0 : viewPosOffset.y - transitiony;
 
-        if (viewPosOffset.x == 0 && viewPosOffset.y == 0)
+        if (sfx.at(goTrack)->sound.getStatus() == 0)
             phase = DEORBIT;
     }
     else if (phase == LANDED || phase == DEORBIT)
@@ -141,12 +152,14 @@ void Game::update()
         viewPos = lander.getPosition();
     }
 
-    if (abs(zoom - zoomGoal) < 0.05)
+    if (abs(zoom - zoomGoal) < 0.1)
         zoom = zoomGoal;
     if (zoom < zoomGoal)
-        zoom += 0.05;
+        zoom += 0.1;
     if (zoom > zoomGoal)
-        zoom -= 0.05;
+        zoom -= 0.1;
+
+    std::cout << zoomGoal << "\n";
 
     lastPhase = phase;
 
@@ -188,14 +201,14 @@ void Game::draw()
         selectSprite.setColor(Color(0, 200, 0));
         window->draw(selectSprite);
 
-        zoomGoal = zoom;
+        zoomGoal = STARTZOOM;
     }
 
     if (phase == DEORBIT || phase == ORBIT || phase == LANDED)
     {
-        int maxZoom = 25; int minZoom =  2;
-        int maxAlt = 3e4; int minAlt = 2.2e4;
-        zoomGoal = ((-lander.getPosition().y - minAlt) / (maxAlt - minAlt)) * (maxZoom - minZoom);
+        int maxZoom = 75; int minZoom =  2;
+        int maxAlt = 15000; int minAlt = 0;
+        zoomGoal = ((lander.getAltitude() - minAlt) / (maxAlt - minAlt)) * (maxZoom - minZoom);
         zoomGoal = zoomGoal < minZoom ? minZoom : zoomGoal;
         zoomGoal = zoomGoal > maxZoom ? maxZoom : zoomGoal;
 
@@ -224,10 +237,23 @@ void Game::draw()
         attitudeLM.setOrigin(Vector2f(80, 80));
         attitudeLM.setRotation(lander.getRotation());
         window->draw(attitudeLM);
-    }
 
-    if (phase == DEORBIT)
-    {
+        Sprite thrustText;
+        thrustText.setTexture(textures.at(8));
+        thrustText.setPosition(viewPos + Vector2f(-windowWidth / 2.0 + 2, -windowHeight / 2.0 + 168) * (float)zoom);
+        thrustText.setScale(zoom, zoom);
+        thrustText.setColor(Color(0, 200, 0, hudtransparency));
+        window->draw(thrustText);
+
+        RectangleShape thrustBar;
+        thrustBar.setPosition(viewPos + Vector2f(-windowWidth / 2.0 + 69, -windowHeight / 2.0 + 169) * (float)zoom);
+        thrustBar.setScale(zoom, zoom);
+        thrustBar.setFillColor(Color(0, 0, 0, 0));
+        thrustBar.setOutlineColor(Color(0, 200, 0, hudtransparency));
+        thrustBar.setOutlineThickness(1);
+        thrustBar.setSize(Vector2f(lander.getThrottle() / 10.0 * 92, 9));
+        window->draw(thrustBar);
+
         Sprite altitudeLM;
         double lmOffset = -170 + (lander.getAltitude() / 15000) * 533;
         lmOffset = lmOffset < -170 ? -170 : lmOffset;
@@ -238,6 +264,11 @@ void Game::draw()
         altitudeLM.setColor(Color(0, 200, 0, hudtransparency));
         altitudeLM.setOrigin(46, 0);
         window->draw(altitudeLM);
+    }
+
+    if (phase == DEORBIT)
+    {
+
     }
 
     lander.draw(window, &textures, phase);
@@ -275,10 +306,11 @@ void Game::loadTextures(std::vector<std::string> textureFileNames)
     }
 }
 
-int Game::randint(int low, int high)
+int Game::randomint(int low, int high)
 {
+    srand(totalTime.asMicroseconds());
     int value = rand() % (high + 1 - low) + low;
-    srand(totalTime.asMicroseconds() * value * rand());
+    std::cout << totalTime.asMicroseconds() << "microseconds time\n";
 
     return value;
 }
