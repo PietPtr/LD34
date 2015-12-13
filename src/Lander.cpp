@@ -218,7 +218,7 @@ int Lander::checkCollision(SurfaceGenerator* surfaceGenerator)
             //std::cout << "Lunar contact!" << "\n";
             std::cout << i << ": " << -position.y + hitpoints[i].y << " < " << a * (position.x + hitpoints[i].x) + b
                       << ", pos.y: " << -position.y << ", h1: " << height1 << ", h2: " << height2 << ", get: " << surfaceGenerator->getHeight(position.x + hitpoints[i].x)
-                      ", xpos" << position.x << "\n";
+                      << ", xpos" << position.x << "\n";
             if ((int)rotation % 360 > 270 || (int)rotation % 360 < 90)
                 (*sfx).at(2)->play();
             else
