@@ -39,12 +39,14 @@ class Game
     private:
         RenderWindow* window;
         View view;
-        double zoom = 20;
+        double zoom = 30;
+        double zoomGoal = zoom;
 
         int windowWidth = 1280;
         int windowHeight = 720;
 
         Vector2f viewPos { 0, 0 };
+        Vector2f viewPosOffset { 500, 300 }; //relative to lander
 
         Time frameTime;
         Time totalTime;
@@ -56,7 +58,9 @@ class Game
                                                   "faint-shadow.wav", "watch-your-shadow.wav", "lunar-velocity.wav",
                                                   "700-feet.wav", "600-feet.wav", "540-feet.wav", "400-feet.wav",
                                                   "350-feet.wav", "300-feet.wav", "100-feet.wav", "75-feet.wav",
-                                                  "50-feet.wav", "40-feet.wav", "houston-problem.wav" };
+                                                  "50-feet.wav", "40-feet.wav", "houston-problem.wav",
+                                                  "go-for-landing1.wav", "go-for-landing2.wav", "go-for-pdi1.wav",
+                                                  "go-for-pdi2.wav" };
         std::vector<std::string> textureFileNames { "lander.png", "booster.png", "menu.png", "select.png" };
 
         std::vector<Audio*> sfx;
@@ -68,6 +72,7 @@ class Game
         SurfaceGenerator surfaceGenerator;
 
         int phase = MENU;
+        int lastPhase = MENU;
 
         int mission = 11;
 };

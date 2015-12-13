@@ -20,6 +20,7 @@ class Lander
         Lander();
         void init(LanderSettings landerSettings);
         int  update(double dt, int phase, SurfaceGenerator* surfaceGenerator);
+        int  phaseMenu();
         int  phaseOrbit();
         int  phaseDeorbit(SurfaceGenerator* surfaceGenerator);
         int  phaseTouchdown();
