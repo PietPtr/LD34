@@ -39,14 +39,14 @@ class Lander
         Vector2<double> thrust;
         double speed;                 // in meters per second
         double gravitationForce;
-        double rotation = 270;
+        double rotation = 0;
         double angularMomentum = 0;
         double mass = 15200; // kg
         double dt;
         double totalTime;
         double rocketPower = 24685; //Fsum = 0 when this is ~25000
         const double maxThrust = 45000;
-        double throttle = 1.0;
+        double throttle = 24685/45000;
         double altitude = 0;
         double lastSoundPlayed = 0; // time
 

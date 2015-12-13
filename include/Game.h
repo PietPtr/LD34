@@ -75,4 +75,6 @@ class Game
         int lastPhase = MENU;
 
         int mission = 11;
+
+        bool choice = false;
 };

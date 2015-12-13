@@ -56,6 +56,21 @@ void Game::update()
                 phase = LANDED;
             if (event.key.code == Keyboard::Space)
                 sfx.at(0)->play();
+            if (event.key.code == Keyboard::Up)
+                choice = !choice;
+            if (event.key.code == Keyboard::Down)
+                choice = !choice;
+            if (event.key.code == Keyboard::Return)
+            {
+                if (choice)
+                {
+                    window->close();
+                }
+                else
+                {
+                    phase = 1;
+                }
+            }
         }
         if (event.type == Event::Resized)
         {
@@ -131,6 +146,8 @@ void Game::update()
 
     lastPhase = phase;
 
+    std::cout << choice << "\n";
+
     frame++;
 }
 
@@ -159,6 +176,14 @@ void Game::draw()
         menuSprite.setScale(zoom, zoom);
         menuSprite.setOrigin(128, 128);
         window->draw(menuSprite);
+
+        Sprite selectSprite;
+        selectSprite.setTexture(textures.at(3));
+        selectSprite.setPosition(viewPos + Vector2f(-128 * zoom, (-128 + choice * 96) * zoom));
+        selectSprite.setScale(zoom, zoom);
+        selectSprite.setOrigin(64, 0);
+        window->draw(selectSprite);
+
         zoomGoal = zoom;
     }
 
