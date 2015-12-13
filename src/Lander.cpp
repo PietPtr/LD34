@@ -51,6 +51,13 @@ int Lander::phaseOrbit()
     position.x = position.x + velocity.x * speed * dt;
     position.y = position.y + velocity.y * speed * dt;
 
+    if (Keyboard::isKeyPressed(Keyboard::Left)  || Keyboard::isKeyPressed(Keyboard::A))
+        angularMomentum -= 4;
+    if (Keyboard::isKeyPressed(Keyboard::Right) || Keyboard::isKeyPressed(Keyboard::D))
+        angularMomentum += 4;
+
+    rotation += angularMomentum * dt;
+
     /*if ((*sfx).at(2)->sound.getStatus() == 0)
     {
         std::cout << "playing sound 2" << "\n";

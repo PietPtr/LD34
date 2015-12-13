@@ -30,6 +30,7 @@ class Lander
         double calcGravitationForce();
         bool isSoundPlaying();
         Vector2f getPosition() { return (Vector2f)(position); }
+        double getAltitude() { return altitude; }
     protected:
     private:
         Vector2<double> acceleration; // m/s^2
@@ -39,7 +40,7 @@ class Lander
         Vector2<double> thrust;
         double speed;                 // in meters per second
         double gravitationForce;
-        double rotation = 0;
+        double rotation = 270;
         double angularMomentum = 0;
         double mass = 15200; // kg
         double dt;

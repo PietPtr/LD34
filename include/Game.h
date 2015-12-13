@@ -61,7 +61,8 @@ class Game
                                                   "50-feet.wav", "40-feet.wav", "houston-problem.wav",
                                                   "go-for-landing1.wav", "go-for-landing2.wav", "go-for-pdi1.wav",
                                                   "go-for-pdi2.wav" };
-        std::vector<std::string> textureFileNames { "lander.png", "booster.png", "menu.png", "select.png" };
+        std::vector<std::string> textureFileNames { "lander.png", "booster.png", "menu.png", "select.png",
+                                                  "altitude.png", "altitude-LM.png" };
 
         std::vector<Audio*> sfx;
         std::vector<Texture> textures;
@@ -75,6 +76,8 @@ class Game
         int lastPhase = MENU;
 
         int mission = 11;
+
+        int hudtransparency = 200;
 
         bool choice = false;
 };

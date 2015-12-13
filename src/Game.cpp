@@ -127,10 +127,13 @@ void Game::update()
         viewPos.x = viewPos.x + viewPosOffset.x * zoom;
         viewPos.y = viewPos.y + viewPosOffset.y * zoom;
 
-        double transitionx = 500 * dt / 10;
-        double transitiony = 300 * dt / 10;
+        double transitionx = 500 * dt / 12;
+        double transitiony = 300 * dt / 12;
         viewPosOffset.x = viewPosOffset.x - transitionx < 0 ? 0 : viewPosOffset.x - transitionx;
         viewPosOffset.y = viewPosOffset.y - transitiony < 0 ? 0 : viewPosOffset.y - transitiony;
+
+        if (viewPosOffset.x == 0 && viewPosOffset.y == 0)
+            phase = DEORBIT;
     }
     else if (phase == LANDED || phase == DEORBIT)
     {
@@ -145,8 +148,6 @@ void Game::update()
         zoom -= 0.05;
 
     lastPhase = phase;
-
-    std::cout << choice << "\n";
 
     frame++;
 }
@@ -175,6 +176,7 @@ void Game::draw()
         menuSprite.setPosition(viewPos);
         menuSprite.setScale(zoom, zoom);
         menuSprite.setOrigin(128, 128);
+        menuSprite.setColor(Color(0, 200, 0));
         window->draw(menuSprite);
 
         Sprite selectSprite;
@@ -182,6 +184,7 @@ void Game::draw()
         selectSprite.setPosition(viewPos + Vector2f(-128 * zoom, (-128 + choice * 96) * zoom));
         selectSprite.setScale(zoom, zoom);
         selectSprite.setOrigin(64, 0);
+        selectSprite.setColor(Color(0, 200, 0));
         window->draw(selectSprite);
 
         zoomGoal = zoom;
@@ -194,6 +197,29 @@ void Game::draw()
         zoomGoal = ((-lander.getPosition().y - minAlt) / (maxAlt - minAlt)) * (maxZoom - minZoom);
         zoomGoal = zoomGoal < minZoom ? minZoom : zoomGoal;
         zoomGoal = zoomGoal > maxZoom ? maxZoom : zoomGoal;
+
+        //metres
+        Sprite altitudeMeter;
+        altitudeMeter.setTexture(textures.at(4));
+        altitudeMeter.setPosition(viewPos + Vector2f(windowWidth / 2.0, -windowHeight / 2.0) * (float)zoom);
+        altitudeMeter.setScale(zoom, zoom);
+        altitudeMeter.setColor(Color(0, 200, 0, hudtransparency));
+        altitudeMeter.setOrigin(Vector2f(50, -2));
+        window->draw(altitudeMeter);
+    }
+
+    if (phase == DEORBIT)
+    {
+        Sprite altitudeLM;
+        double lmOffset = -170 + (lander.getAltitude() / 15000) * 533;
+        lmOffset = lmOffset < -170 ? -170 : lmOffset;
+        lmOffset = lmOffset > 363 ? 363 : lmOffset;
+        altitudeLM.setTexture(textures.at(5));
+        altitudeLM.setPosition(viewPos + Vector2f(windowWidth / 2.0, -lmOffset) * (float)zoom);
+        altitudeLM.setScale(zoom, zoom);
+        altitudeLM.setColor(Color(0, 200, 0, hudtransparency));
+        altitudeLM.setOrigin(46, 0);
+        window->draw(altitudeLM);
     }
 
     lander.draw(window, &textures, phase);

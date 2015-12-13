@@ -60,7 +60,7 @@ void SurfaceGenerator::midPointDisplacement(double* values, int length, int seed
     int steps = log2(length - 1);
 
     double randrange = 1.0;
-    double roughness = 0.6;
+    double roughness = 0.5;
 
     //length = length - pow(2, skip);
     //std::cout << length << "\n";
@@ -95,7 +95,7 @@ void SurfaceGenerator::midPointDisplacement(double* values, int length, int seed
     {
         values[i] = (values[i] - min) / (max - min);
         /*for (int j = 0; j < values[i] * 40.0; j++)
-            std::cout << "|";
+            std::cout << "ha";
         std::cout << "\n";*/
     }
 }
