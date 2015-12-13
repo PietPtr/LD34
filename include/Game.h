@@ -62,7 +62,7 @@ class Game
                                                   "go-for-landing1.wav", "go-for-landing2.wav", "go-for-pdi1.wav",
                                                   "go-for-pdi2.wav" };
         std::vector<std::string> textureFileNames { "lander.png", "booster.png", "menu.png", "select.png",
-                                                  "altitude.png", "altitude-LM.png" };
+                                                  "altitude.png", "altitude-LM.png", "attitude.png", "attitude-LM.png" };
 
         std::vector<Audio*> sfx;
         std::vector<Texture> textures;

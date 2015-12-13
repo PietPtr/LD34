@@ -31,6 +31,7 @@ class Lander
         bool isSoundPlaying();
         Vector2f getPosition() { return (Vector2f)(position); }
         double getAltitude() { return altitude; }
+        double getRotation() { return rotation; }
     protected:
     private:
         Vector2<double> acceleration; // m/s^2

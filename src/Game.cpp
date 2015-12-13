@@ -122,13 +122,13 @@ void Game::update()
     else if (phase == ORBIT)
     {
         if (lastPhase == MENU)
-            sfx.at(20 + randint(0, 3))->play();
+            sfx.at(20 + randint(0, 1) * 2 + 1)->play();
 
         viewPos.x = viewPos.x + viewPosOffset.x * zoom;
         viewPos.y = viewPos.y + viewPosOffset.y * zoom;
 
-        double transitionx = 500 * dt / 12;
-        double transitiony = 300 * dt / 12;
+        double transitionx = 500 * dt / 14;
+        double transitiony = 300 * dt / 14;
         viewPosOffset.x = viewPosOffset.x - transitionx < 0 ? 0 : viewPosOffset.x - transitionx;
         viewPosOffset.y = viewPosOffset.y - transitiony < 0 ? 0 : viewPosOffset.y - transitiony;
 
@@ -206,6 +206,14 @@ void Game::draw()
         altitudeMeter.setColor(Color(0, 200, 0, hudtransparency));
         altitudeMeter.setOrigin(Vector2f(50, -2));
         window->draw(altitudeMeter);
+
+        Sprite attitudeMeter;
+        attitudeMeter.setTexture(textures.at(6));
+        attitudeMeter.setPosition(viewPos + Vector2f(-windowWidth / 2.0, -windowHeight / 2.0) * (float)zoom);
+        attitudeMeter.setScale(zoom, zoom);
+        attitudeMeter.setColor(Color(0, 200, 0, hudtransparency));
+        attitudeMeter.setOrigin(Vector2f(-2, -2));
+        window->draw(attitudeMeter);
     }
 
     if (phase == DEORBIT)
@@ -220,6 +228,15 @@ void Game::draw()
         altitudeLM.setColor(Color(0, 200, 0, hudtransparency));
         altitudeLM.setOrigin(46, 0);
         window->draw(altitudeLM);
+
+        Sprite attitudeLM;
+        attitudeLM.setTexture(textures.at(7));
+        attitudeLM.setPosition(viewPos + Vector2f(-windowWidth / 2.0 + 80, -windowHeight / 2.0 + 80) * (float)zoom);
+        attitudeLM.setScale(zoom, zoom);
+        attitudeLM.setColor(Color(0, 200, 0, hudtransparency));
+        attitudeLM.setOrigin(Vector2f(80, 80));
+        attitudeLM.setRotation(lander.getRotation());
+        window->draw(attitudeLM);
     }
 
     lander.draw(window, &textures, phase);
