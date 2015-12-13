@@ -196,6 +196,7 @@ int Lander::checkCollision(SurfaceGenerator* surfaceGenerator)
         int index = (int)((position.x + hitpoints[i].x) / 16.0) % 4097;
         index = index > 4097 ? 0 : index;
 
+//        std::cout << (int)(position.x + hitpoints[i].x) % 16 + 16 * index << " " << (position.x + hitpoints[i].x) << " " << ((int)(position.x + hitpoints[i].x) % 16 + 16 * index) - (position.x hitpoints[i].x) <<  "\n";
         std::cout << index << "\n";
         double baseHeight = surfaceGenerator->getBaseHeight();
         double surfaceHeight = surfaceGenerator->getSurfaceHeight();
@@ -205,7 +206,7 @@ int Lander::checkCollision(SurfaceGenerator* surfaceGenerator)
         double height2 = surfaceGenerator->getHeight(position.x + hitpoints[i].x + 16);
 
         // create line function between surface points
-        double x1 = (index + (int)((position.x + hitpoints[i].x) / 4097.0 / 16)) * 16;
+        double x1 = (int)(position.x + hitpoints[i].x) % 16 + 16 * index;
         double y1 = height1;
         double y2 = height2;
         double a = (abs(height1 - height2)) / 16.0;
@@ -213,17 +214,18 @@ int Lander::checkCollision(SurfaceGenerator* surfaceGenerator)
         //std::cout << "y = " << a << "x + " << b << "    ";
 
         // check hitpoints.y < line(hitpoints.x)
-        if (-position.y - hitpoints[i].y < a * (position.x + hitpoints[i].x) + b)
+        if (-position.y - hitpoints[i].y < a * x1 + b)
         {
             //std::cout << "Lunar contact!" << "\n";
             std::cout << i << ": " << -position.y + hitpoints[i].y << " < " << a * (position.x + hitpoints[i].x) + b
                       << ", pos.y: " << -position.y << ", h1: " << height1 << ", h2: " << height2 << ", get: " << surfaceGenerator->getHeight(position.x + hitpoints[i].x)
-                      << ", xpos" << position.x << "\n";
+                      << ", xpos: " << position.x << ", index: " << index << ", x1: " << x1 << ", y = " << a << "x + " << b << "\n";
             if ((int)rotation % 360 > 270 || (int)rotation % 360 < 90)
                 (*sfx).at(2)->play();
+
             else
                 (*sfx).at(19)->play();
-            return 0;
+            return 3;
         }
 
         // true -> set phase touchdown

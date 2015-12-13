@@ -16,15 +16,16 @@ void Game::initialize()
     loadTextures(textureFileNames);
 
     LanderSettings landerSettings;
-    landerSettings.position = Vector2<double>(16 * 3500, -32000);
+    landerSettings.position = Vector2<double>(16 * 7700, -32000);
     landerSettings.velocity = Vector2<double>(1, 0);
-    landerSettings.speed = 550;
+    landerSettings.speed = 1150;
     landerSettings.sfx = &sfx;
     std::cout << &sfx << " &sfx\n";
     std::cout << landerSettings.sfx << " landerSettings.sfx\n";
     lander.init(landerSettings);
 
-    mission = randint(11, 17);
+    mission = 11;//randint(11, 17);
+    std::cout << "The mission is Apollo " << mission << "\n";
 
     surfaceGenerator.init(mission);
 
