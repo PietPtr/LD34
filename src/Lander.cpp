@@ -140,7 +140,7 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
 
     if (Keyboard::isKeyPressed(Keyboard::S))
         position.y = -32000;
-    throttle = 0;
+    //throttle = 0;
 
     return 2;
 }
