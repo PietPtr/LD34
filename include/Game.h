@@ -39,7 +39,7 @@ class Game
     private:
         RenderWindow* window;
         View view;
-        double zoom = 30;
+        double zoom = 25;
         double zoomGoal = zoom;
 
         int windowWidth = 1280;

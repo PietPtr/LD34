@@ -27,6 +27,7 @@ int Lander::update(double dt, int phase, SurfaceGenerator* surfaceGenerator)
 {
     this->dt = dt;
     this->totalTime += dt;
+    this->phase = phase;
 
     if (phase == 0)
         return phaseMenu();
@@ -34,6 +35,8 @@ int Lander::update(double dt, int phase, SurfaceGenerator* surfaceGenerator)
         return phaseOrbit();
     else if (phase == 2)
         return phaseDeorbit(surfaceGenerator);
+    else if (phase == 3)
+        return phaseTouchdown(surfaceGenerator);
     return -1;
 }
 
@@ -70,7 +73,7 @@ int Lander::phaseOrbit()
 
 int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
 {
-    if (checkCollision(surfaceGenerator) == 3)
+    if (checkLanded(surfaceGenerator) == 3)
         return 3;
 
     // Forces
@@ -123,7 +126,7 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
     if (altitude < 1000)
         throttle = 5.0;
     if (altitude < 500)
-        throttle = 10.0;
+        throttle = 6.0;
     if (altitude < 100 && altitude > 0)
         throttle = altitude / 100;
     if (altitude < 0)
@@ -143,6 +146,44 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
     //throttle = 0;
 
     return 2;
+}
+
+int Lander::phaseTouchdown(SurfaceGenerator* surfaceGenerator)
+{
+    //std::cout << (int)rotation % 360 << " " << touchdownSlope << "\n";
+
+    /*if (rotation - (360 - touchdownSlope) < 1)
+        rotation = 360 - touchdownSlope;
+    if (rotation < 360 - touchdownSlope)
+        rotation += 1;
+    if (rotation > 360 - touchdownSlope)
+        rotation -= 1;*/
+
+    double cs = cos(rotation * (PI/180));
+    double sn = sin(rotation * (PI/180));
+    if (touchdownStrut == 0)
+    {
+        hitpoints[1].x = 120 + ((240) * cs - (0) * sn);
+        hitpoints[1].y = 126 + ((240) * sn + (0) * cs);
+    }
+    if (touchdownStrut == 1)
+    {
+        hitpoints[0].x = -256 * cs - 0 * sn;
+        hitpoints[0].y = -256 * sn + 0 * cs;
+    }
+
+    if (touchdownStrut == 0 && !checkCollision(hitpoints[1], surfaceGenerator))
+        rotation++;
+    if (touchdownStrut == 1 && !checkCollision(hitpoints[0], surfaceGenerator))
+        rotation--;
+
+    std::cout << checkCollision(hitpoints[1], surfaceGenerator) << "\n";
+
+    if (Keyboard::isKeyPressed(Keyboard::Right))
+        rotation++;
+
+
+    return 3;
 }
 
 void Lander::playAtmosphericSound()
@@ -176,12 +217,11 @@ bool Lander::isSoundPlaying()
     //std::cout << std::endl;
 }
 
-int Lander::checkCollision(SurfaceGenerator* surfaceGenerator)
+int Lander::checkLanded(SurfaceGenerator* surfaceGenerator)
 {
     // calculate hitpoint position
     double cs = cos(rotation * (PI/180));
     double sn = sin(rotation * (PI/180));
-    Vector2i hitpoints[2];
     hitpoints[0].x = -120 * cs - 126 * sn;
     hitpoints[0].y = -120 * sn + 126 * cs;
     hitpoints[1].x =  120 * cs - 126 * sn;
@@ -190,14 +230,26 @@ int Lander::checkCollision(SurfaceGenerator* surfaceGenerator)
     //std::cout << "Altitude: " << altitude << "\n";
 
     // for
+
     for (int i = 0; i < 2; i++)
     {
+        if (checkCollision(hitpoints[i], surfaceGenerator))
+        {
+            touchdownStrut = i;
+
+            if ((int)rotation % 360 > 270 && (int)rotation % 360 < 90)
+                (*sfx).at(2)->play();
+            else
+                (*sfx).at(19)->play();
+
+            return 3;
+        }
+
         // find surface points under hitpoints
-        int index = (int)((position.x + hitpoints[i].x) / 16.0) % 4097;
+        /*int index = (int)((position.x + hitpoints[i].x) / 16.0) % 4097;
         index = index > 4097 ? 0 : index;
 
-//        std::cout << (int)(position.x + hitpoints[i].x) % 16 + 16 * index << " " << (position.x + hitpoints[i].x) << " " << ((int)(position.x + hitpoints[i].x) % 16 + 16 * index) - (position.x hitpoints[i].x) <<  "\n";
-        std::cout << index << "\n";
+        //std::cout << (int)(position.x + hitpoints[i].x) % 16 + 16 * index << " " << (position.x + hitpoints[i].x) << " " << ((int)(position.x + hitpoints[i].x) % 16 + 16 * index) - (position.x hitpoints[i].x) <<  "\n";
         double baseHeight = surfaceGenerator->getBaseHeight();
         double surfaceHeight = surfaceGenerator->getSurfaceHeight();
         //double height1 = baseHeight + surfaceGenerator->surface[index] * surfaceHeight;         //maybe something is wrong here
@@ -217,21 +269,81 @@ int Lander::checkCollision(SurfaceGenerator* surfaceGenerator)
         if (-position.y - hitpoints[i].y < a * x1 + b)
         {
             //std::cout << "Lunar contact!" << "\n";
-            std::cout << i << ": " << -position.y + hitpoints[i].y << " < " << a * (position.x + hitpoints[i].x) + b
+            /*std::cout << i << ": " << -position.y + hitpoints[i].y << " < " << a * (position.x + hitpoints[i].x) + b
                       << ", pos.y: " << -position.y << ", h1: " << height1 << ", h2: " << height2 << ", get: " << surfaceGenerator->getHeight(position.x + hitpoints[i].x)
                       << ", xpos: " << position.x << ", index: " << index << ", x1: " << x1 << ", y = " << a << "x + " << b << "\n";
-            if ((int)rotation % 360 > 270 || (int)rotation % 360 < 90)
-                (*sfx).at(2)->play();
+            //touchdownSlope = atan(a) * (180/PI);
+            /*double d = abs(touchdownSlope - (int)(rotation + 90) % 360) % 360;
+            double r = d > 180 ? 360 - d : d;
 
+            if ((int)rotation % 360 > 270 && (int)rotation % 360 < 90)
+                (*sfx).at(2)->play();
             else
                 (*sfx).at(19)->play();
+            //std::cout << hillAngle << " degrees hill. Lander has a roll of " << (int)rotation % 360 << " degrees. The difference is " << r << "\n";
+
+            touchdownStrut = i;
+
+            //if (rotation != 360 - hillAngle)
+
             return 3;
-        }
+        }*/
 
         // true -> set phase touchdown
     }
-    std::cout << "\n";
     return 0;
+}
+
+bool Lander::checkCollision(Vector2i hitpoint, SurfaceGenerator* surfaceGenerator)
+{
+    Vector2<double> pos;
+    /*if (phase == 3 && touchdownStrut == 0)
+        pos = Vector2<double>(position.x - hitpoints[1].x, position.y + hitpoints[1].y);
+    else if (phase == 3 && touchdownStrut == 1)
+        pos = Vector2<double>(position.x + hitpoints[0].x, position.y + hitpoints[0].y );
+    else
+        pos = position;*/
+    pos = position;
+
+    // find surface points under hitpoints
+    int index = (int)((position.x + hitpoint.x) / 16.0) % 4097;
+    index = index > 4097 ? 0 : index;
+
+    //std::cout << (int)(position.x + hitpoints[i].x) % 16 + 16 * index << " " << (position.x + hitpoints[i].x) << " " << ((int)(position.x + hitpoints[i].x) % 16 + 16 * index) - (position.x hitpoints[i].x) <<  "\n";
+    double baseHeight = surfaceGenerator->getBaseHeight();
+    double surfaceHeight = surfaceGenerator->getSurfaceHeight();
+    //double height1 = baseHeight + surfaceGenerator->surface[index] * surfaceHeight;         //maybe something is wrong here
+    //double height2 = baseHeight + surfaceGenerator->surface[index + 1] * surfaceHeight;
+    double height1 = surfaceGenerator->getHeight(pos.x + hitpoint.x);
+    double height2 = surfaceGenerator->getHeight(pos.x + hitpoint.x + 16);
+
+    // create line function between surface points
+    double x1 = (int)(pos.x + hitpoint.x) % 16 + 16 * index;
+    double y1 = height1;
+    double y2 = height2;
+    double a = (abs(height1 - height2)) / 16.0;
+    double b = y1 - a * x1;
+    //std::cout << "y = " << a << "x + " << b << "    ";
+
+    // check hitpoints.y < line(hitpoints.x)
+    if (-pos.y - hitpoint.y < a * x1 + b)
+    {
+        /*std::cout << i << ": " << -position.y + hitpoints[i].y << " < " << a * (position.x + hitpoints[i].x) + b
+                  << ", pos.y: " << -position.y << ", h1: " << height1 << ", h2: " << height2 << ", get: " << surfaceGenerator->getHeight(position.x + hitpoints[i].x)
+                  << ", xpos: " << position.x << ", index: " << index << ", x1: " << x1 << ", y = " << a << "x + " << b << "\n";*/
+        //touchdownSlope = atan(a) * (180/PI);
+        /*double d = abs(touchdownSlope - (int)(rotation + 90) % 360) % 360;
+        double r = d > 180 ? 360 - d : d;*/
+
+
+        //std::cout << hillAngle << " degrees hill. Lander has a roll of " << (int)rotation % 360 << " degrees. The difference is " << r << "\n";
+
+
+        //if (rotation != 360 - hillAngle)
+
+        return true;
+    }
+    return false;
 }
 
 void Lander::draw(RenderWindow* window, std::vector<Texture>* textures, int phase)
@@ -241,6 +353,14 @@ void Lander::draw(RenderWindow* window, std::vector<Texture>* textures, int phas
     landerSprite.setOrigin(Vector2f(128, 128));
     landerSprite.setPosition(Vector2f(position.x, position.y));
     landerSprite.setRotation(rotation);
+    if (phase == 3)
+    {
+        if (touchdownStrut == 0)
+            landerSprite.setOrigin(Vector2f(128 - 120, 128 + 126));
+        else if (touchdownStrut == 1)
+            landerSprite.setOrigin(Vector2f(128 + 120, 128 + 126));
+        landerSprite.setPosition(Vector2f(position.x + hitpoints[touchdownStrut].x, position.y + hitpoints[touchdownStrut].y));
+    }
 
     Sprite boosterSprite;
     int boosterLength = (throttle / 1.0) * 125;
@@ -267,13 +387,7 @@ void Lander::draw(RenderWindow* window, std::vector<Texture>* textures, int phas
 
     window->draw(line, 2, sf::Lines);*/
 
-    /*double cs = cos(rotation * (PI/180));
-    double sn = sin(rotation * (PI/180));
-    Vector2i hitpoints[2];
-    hitpoints[0].x = -120 * cs - 126 * sn;
-    hitpoints[0].y = -(-120 * sn + 126 * cs);
-    hitpoints[1].x =  120 * cs - 126 * sn;
-    hitpoints[1].y =  -(120 * sn + 126 * cs);
+
 
     double radius = 50;
     CircleShape hitpoint(radius);
@@ -292,7 +406,7 @@ void Lander::draw(RenderWindow* window, std::vector<Texture>* textures, int phas
     pos.setFillColor(Color(0, 200, 0, 155));
     pos.setPosition(Vector2f(position.x, position.y));
     pos.setOrigin(Vector2f(radius, radius));
-    window->draw(pos);*/
+    window->draw(pos);
 }
 
 double Lander::calcGravitationForce()

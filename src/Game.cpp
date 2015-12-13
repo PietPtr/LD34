@@ -16,7 +16,7 @@ void Game::initialize()
     loadTextures(textureFileNames);
 
     LanderSettings landerSettings;
-    landerSettings.position = Vector2<double>(16 * 2048, -32000);
+    landerSettings.position = Vector2<double>(16 * 2048, -30000);
     landerSettings.velocity = Vector2<double>(1, 0);
     landerSettings.speed = 1150;
     landerSettings.sfx = &sfx;
@@ -24,7 +24,7 @@ void Game::initialize()
     std::cout << landerSettings.sfx << " landerSettings.sfx\n";
     lander.init(landerSettings);
 
-    mission = 11;//randint(11, 17);
+    mission = 16;//randint(11, 17);
     std::cout << "The mission is Apollo " << mission << "\n";
 
     surfaceGenerator.init(mission);
@@ -193,8 +193,8 @@ void Game::draw()
 
     if (phase == DEORBIT || phase == ORBIT || phase == LANDED)
     {
-        int maxZoom = 30; int minZoom =  4;
-        int maxAlt = 3e4; int minAlt = 2e4;
+        int maxZoom = 25; int minZoom =  2;
+        int maxAlt = 3e4; int minAlt = 2.2e4;
         zoomGoal = ((-lander.getPosition().y - minAlt) / (maxAlt - minAlt)) * (maxZoom - minZoom);
         zoomGoal = zoomGoal < minZoom ? minZoom : zoomGoal;
         zoomGoal = zoomGoal > maxZoom ? maxZoom : zoomGoal;

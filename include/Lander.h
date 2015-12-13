@@ -23,10 +23,11 @@ class Lander
         int  phaseMenu();
         int  phaseOrbit();
         int  phaseDeorbit(SurfaceGenerator* surfaceGenerator);
-        int  phaseTouchdown();
-        int  checkCollision(SurfaceGenerator* surfaceGenerator);
+        int  phaseTouchdown(SurfaceGenerator* surfaceGenerator);
+        int  checkLanded(SurfaceGenerator* surfaceGenerator);
         void playAtmosphericSound();
         void draw(RenderWindow* window, std::vector<Texture>* textures, int phase);
+        bool checkCollision(Vector2i hitpoint, SurfaceGenerator* surfaceGenerator);
         double calcGravitationForce();
         bool isSoundPlaying();
         Vector2f getPosition() { return (Vector2f)(position); }
@@ -39,6 +40,7 @@ class Lander
         Vector2<double> velocity;     // keep this normalized please
         Vector2<double> gravitation;
         Vector2<double> thrust;
+        Vector2i hitpoints[2];
         double speed;                 // in meters per second
         double gravitationForce;
         double rotation = 270;
@@ -51,6 +53,9 @@ class Lander
         double throttle = 24685/45000;
         double altitude = 0;
         double lastSoundPlayed = 0; // time
+        int touchdownStrut = -1;
+        double stableRotation = 0;
+        int phase;
 
         LanderSettings settings;
         std::vector<Audio*>* sfx;
