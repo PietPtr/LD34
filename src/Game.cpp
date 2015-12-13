@@ -16,7 +16,7 @@ void Game::initialize()
     loadTextures(textureFileNames);
 
     LanderSettings landerSettings;
-    landerSettings.position = Vector2<double>(16 * 7700, -32000);
+    landerSettings.position = Vector2<double>(16 * 2048, -32000);
     landerSettings.velocity = Vector2<double>(1, 0);
     landerSettings.speed = 1150;
     landerSettings.sfx = &sfx;
