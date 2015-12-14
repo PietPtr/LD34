@@ -298,8 +298,34 @@ void Game::draw()
         thrustBar.setOutlineThickness(1);
         thrustBar.setSize(Vector2f(lander->getThrottle() / 10.0 * 92, 9));
         window->draw(thrustBar);
+    }
 
+    if (phase == DEORBIT)
+    {
+        Sprite horizontalWarn;
+        horizontalWarn.setTexture(textures.at(15));
+        horizontalWarn.setPosition(viewPos + Vector2f(-2, -windowHeight / 2.0 + 2) * (float)zoom);
+        horizontalWarn.setScale(zoom, zoom);
+        horizontalWarn.setColor(Color(200, 0, 0, 25));
+        horizontalWarn.setOrigin(Vector2f(124, 0));
 
+        Sprite verticalWarn;
+        verticalWarn.setTexture(textures.at(16));
+        verticalWarn.setPosition(viewPos + Vector2f(124 + 2, -windowHeight / 2.0 + 2) * (float)zoom);
+        verticalWarn.setScale(zoom, zoom);
+        verticalWarn.setColor(Color(200, 0, 0, 25));
+        verticalWarn.setOrigin(Vector2f(124, 0));
+
+        if (lander->getVelocity().x > 150)
+        {
+            horizontalWarn.setColor(Color(200, 0, 0, 255));
+        }
+        else if (lander->getVelocity().y > 150)
+        {
+            verticalWarn.setColor(Color(200, 0, 0, 255));
+        }
+        window->draw(horizontalWarn);
+        window->draw(verticalWarn);
     }
 
     if (phase == LANDED)

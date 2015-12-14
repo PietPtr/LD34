@@ -57,7 +57,6 @@ int Lander::phaseOrbit()
 
     position.x = position.x + orbitVelocity.x * dt;
     position.y = position.y + orbitVelocity.y * dt;
-    std::cout << "this should not appear during landing\n";
 
     if (Keyboard::isKeyPressed(Keyboard::Left)  || Keyboard::isKeyPressed(Keyboard::A))
         angularMomentum -= 4;
@@ -90,7 +89,6 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
     //std::cout << "gravitation " << calcGravitationForce() << "\n";
 
     rocketPower = sqrt(pow(velocity.x, 2) + pow(velocity.y, 2)) * (mass / 50);
-    std::cout << "rocketpower: " << rocketPower << "\n";
     thrust.x = cos(rotation * (PI/180) - 0.5 * PI) * rocketPower;
     thrust.y = sin(rotation * (PI/180) - 0.5 * PI) * rocketPower;
 
@@ -162,11 +160,6 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
         position.y = -32000;
     //throttle = 0;
 
-    printVector(acceleration, "acceleration");
-    printVector(velocity, "velocity");
-    printVector(position, "position");
-    printVector(thrust, "thrust");
-
     return 2;
 }
 
@@ -210,18 +203,20 @@ int Lander::phaseTouchdown(SurfaceGenerator* surfaceGenerator)
 
 void Lander::playAtmosphericSound()
 {
-    if (altitude > 8000)
+    int altOrRand = randint(0, 1, altitude);
+    if (altOrRand == 0)
     {
         (*sfx).at(3 + randint(0, 5, altitude))->play();
         std::cout << "playing sound " << 3 + randint(0, 5, altitude) << "\n";
         //(*sfx).at(6)->play();
     }
-    else if (altitude < 8000)
+    else if (altOrRand = 1)
     {
         (*sfx).at(9 + heightSound)->play();
         heightSound++;
     }
     heightSound = heightSound > 9 ? 0 : heightSound;
+    std::cout << altOrRand << "\n";
 
     lastSoundPlayed = totalTime;
 }
@@ -270,7 +265,7 @@ int Lander::checkLanded(SurfaceGenerator* surfaceGenerator)
             throttle = 0;
             if (velocity.x > 150)
                 deathCause = VELOCITY;
-            if (velocity.y > 100)
+            if (velocity.y > 150)
                 deathCause = VELOCITY;
             std::cout << deathCause << " death cause\n";
 

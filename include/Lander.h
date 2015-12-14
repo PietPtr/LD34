@@ -39,6 +39,7 @@ class Lander
         double calcGravitationForce();
         bool isSoundPlaying();
         Vector2f getPosition() { return (Vector2f)(position); }
+        Vector2f getVelocity() { return (Vector2f)(velocity); }
         double getAltitude() { return altitude; }
         double getRotation() { return rotation; }
         double getThrottle() { return throttle; }
