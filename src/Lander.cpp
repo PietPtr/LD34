@@ -23,10 +23,10 @@ void Lander::init(LanderSettings settings)
     std::cout << "Lander initialized...\n";
 }
 
-int Lander::update(double dt, int phase, SurfaceGenerator* surfaceGenerator)
+int Lander::update(double dt, double totalTime, int phase, SurfaceGenerator* surfaceGenerator)
 {
     this->dt = dt;
-    this->totalTime += dt;
+    this->totalTime = totalTime;
     this->phase = phase;
 
     altitude = -position.y - surfaceGenerator->getHeight(position.x);
@@ -237,17 +237,19 @@ int Lander::checkLanded(SurfaceGenerator* surfaceGenerator)
     for (int i = 0; i < 2; i++)
     {
         belowSurface = checkCollision(hitpoints[i], surfaceGenerator);
-        std::cout << belowSurface << "\n";
 
         if (belowSurface != -1)
         {
             touchdownStrut = i;
             touchdownAngle = rotation;
             touchdownPos = position;
-            if (abs(angularMomentum) < 30)
+            touchDownTime = totalTime;
+
+            if (fabs(angularMomentum) < 30)
                 angularMomentum = 30;
 
             position.y -= belowSurface;
+
 
             throttle = 0;
 
@@ -395,7 +397,31 @@ void Lander::draw(RenderWindow* window, std::vector<Texture>* textures, int phas
     if (phase == 2)
         window->draw(boosterSprite);
 
-    window->draw(landerSprite);
+    if (deathCause == ALIVE)
+    {
+        window->draw(landerSprite);
+    }
+    else
+    {
+        double explodeFactor = 1 + (totalTime - touchDownTime) * 4;
+        Vector2f explosionPos = Vector2f(position.x, position.y);
+        int fragments = 9; // squared
+        int stepSize = 256.0 / fragments;
+        for (int x = 0; x < 256; x += stepSize)
+        {
+            for (int y = 0; y < 256; y += stepSize)
+            {
+                Sprite lmFragment;
+                lmFragment.setTexture(textures->at(0));
+                lmFragment.setTextureRect(IntRect(x, y, stepSize, stepSize));
+                lmFragment.setPosition(explosionPos + Vector2f((x - 128) * (explodeFactor),
+                                                               (y - 128) * (explodeFactor)));
+                window->draw(lmFragment);
+                std::cout << x << "," << y << "\n";
+            }
+        }
+    }
+
 
     /*sf::Vertex line[] =
     {

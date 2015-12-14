@@ -26,7 +26,7 @@ class Lander
     public:
         Lander();
         void init(LanderSettings landerSettings);
-        int  update(double dt, int phase, SurfaceGenerator* surfaceGenerator);
+        int  update(double dt, double totalTime, int phase, SurfaceGenerator* surfaceGenerator);
         int  phaseMenu();
         int  phaseOrbit();
         int  phaseDeorbit(SurfaceGenerator* surfaceGenerator);
@@ -53,7 +53,7 @@ class Lander
         Vector2i hitpoints[2];
         double speed;                 // in meters per second
         double gravitationForce;
-        double rotation = 315;
+        double rotation = 225;
         double angularMomentum = 0;
         double mass = 15200; // kg
         double dt;
@@ -64,6 +64,7 @@ class Lander
         double altitude = 0;
         double lastSoundPlayed = 0; // time
         double touchdownAngle = 0;
+        double touchDownTime = 0;
         int touchdownStrut = -1;
         Vector2<double> touchdownPos;
         double stableRotation = 0;

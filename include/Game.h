@@ -39,7 +39,7 @@ class Game
     private:
         RenderWindow* window;
         View view;
-        const double STARTZOOM = 30;
+        const double STARTZOOM = 40;
         double zoom = STARTZOOM;
         double zoomGoal = STARTZOOM;
 
@@ -47,7 +47,7 @@ class Game
         int windowHeight = 720;
 
         Vector2f viewPos { 0, 0 };
-        Vector2f viewPosOffset { 500, 300 }; //relative to lander
+        Vector2f viewPosOffset { 0, 0 }; //relative to lander
 
         Time frameTime;
         Time totalTime;
