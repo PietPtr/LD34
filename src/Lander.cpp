@@ -31,9 +31,6 @@ int Lander::update(double dt, double totalTime, int phase, SurfaceGenerator* sur
 
     altitude = -position.y - surfaceGenerator->getHeight(position.x);
 
-    printVector(acceleration, "acceleration");
-    printVector(velocity * speed, "velocity");
-
     if (phase == 0)
         return phaseMenu();
     else if (phase == 1)
@@ -56,11 +53,11 @@ int Lander::phaseMenu()
 int Lander::phaseOrbit()
 {
     acceleration = Vector2<double>(0, 0);
-    velocity = Vector2<double>(1, 0);
+    Vector2<double> orbitVelocity = Vector2<double>(1150, 0);
 
-    position.x = position.x + velocity.x * speed * dt;
-    position.y = position.y + velocity.y * speed * dt;
-    std::cout << "this should not appear doring landing\n";
+    position.x = position.x + orbitVelocity.x * dt;
+    position.y = position.y + orbitVelocity.y * dt;
+    std::cout << "this should not appear during landing\n";
 
     if (Keyboard::isKeyPressed(Keyboard::Left)  || Keyboard::isKeyPressed(Keyboard::A))
         angularMomentum -= 4;
@@ -90,6 +87,10 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
     gravitation = normalize(Vector2<double>(0, 1)) * calcGravitationForce(); // better safe than sorry
                                                                              // - marien, 2015
 
+    //std::cout << "gravitation " << calcGravitationForce() << "\n";
+
+    rocketPower = 0;//maxThrust * throttle;
+    std::cout << rocketPower << "\n";
     thrust.x = cos(rotation * (PI/180) - 0.5 * PI) * rocketPower;
     thrust.y = sin(rotation * (PI/180) - 0.5 * PI) * rocketPower;
 
@@ -98,11 +99,14 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
     // Acceleration
 
     acceleration = Fsum / mass;
+    //std::cout << "Fsum/mass " << Fsum.x / mass << ", " << Fsum.y / mass << "\n";
 
     //double accLength = sqrt(pow(acceleration.x, 2) + pow(acceleration.y, 2));
     //Vector2<double> normalizedAcceleration = Vector2<double>(acceleration.x / accLength, acceleration.y / accLength);
 
     //speed = speed + accLength * dt;
+    /*velocity.x = velocity.y + acceleration.x * dt;
+    velocity.y = velocity.y + acceleration.y * dt;*/
     velocity += acceleration * dt;
 
     //Vector2<double> velocityAndAcceleration = velocity * speed + normalizedAcceleration * accLength;
@@ -126,7 +130,6 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
 
     // Remaining updates
 
-    rocketPower = maxThrust * throttle;
 
     altitude = -position.y - surfaceGenerator->getHeight(position.x);
 
@@ -158,6 +161,11 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
     if (Keyboard::isKeyPressed(Keyboard::S))
         position.y = -32000;
     //throttle = 0;
+
+    printVector(acceleration, "acceleration");
+    printVector(velocity, "velocity");
+    printVector(position, "position");
+    printVector(thrust, "thrust");
 
     return 2;
 }
@@ -475,7 +483,7 @@ double Lander::calcGravitationForce()
 {
     //Fgrav = G * (mM / r^2)
 
-    double r = MOONRADIUS + 150; // Moon position is (0,0)
+    double r = MOONRADIUS; // Moon position is (0,0)
 
     double Fgrav = G * (this->mass * MOONMASS / pow(r, 2));
 
