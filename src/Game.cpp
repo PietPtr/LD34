@@ -17,12 +17,14 @@ void Game::initialize()
     loadAudio(audioFileNames);
     loadTextures(textureFileNames);
 
+    lander = new Lander();
+
     LanderSettings landerSettings;
     landerSettings.position = Vector2<double>(16 * 2048, -32000);
     landerSettings.velocity = Vector2<double>(1, 0);
     landerSettings.speed = 1150;
     landerSettings.sfx = &sfx;
-    lander.init(landerSettings);
+    lander->init(landerSettings);
 
     mission = 16;//randint(11, 17);
 
@@ -125,16 +127,16 @@ void Game::update()
 
     double dt = frameTime.asSeconds() * 1;
 
-    int updateReturn = lander.update(dt, phase, &surfaceGenerator);
+    int updateReturn = lander->update(dt, phase, &surfaceGenerator);
     if (updateReturn != -1)
         phase = updateReturn;
     //if (updateReturn == 3)
 
-    viewPos = lander.getPosition();
+    viewPos = lander->getPosition();
 
     int maxOffset = 5000;
     //double viewLanderOffset = maxOffset + surfaceGenerator.getHeight(lander.getPosition().x) / lander.getPosition().y * maxOffset;
-    double viewLanderOffset = maxOffset + 20000 / lander.getPosition().y * maxOffset;
+    double viewLanderOffset = maxOffset + 20000 / lander->getPosition().y * maxOffset;
     viewLanderOffset = (viewLanderOffset > maxOffset ? maxOffset : viewLanderOffset);
 
     if (phase == MENU)
@@ -161,11 +163,11 @@ void Game::update()
     }
     else if (phase == DEORBIT)
     {
-        viewPos = lander.getPosition();
+        viewPos = lander->getPosition();
     }
     else if (phase == LANDED)
     {
-        viewPos = (Vector2f)(lander.getTouchdownPos());
+        viewPos = (Vector2f)(lander->getTouchdownPos());
     }
 
     if (abs(zoom - zoomGoal) < 0.1)
@@ -191,13 +193,13 @@ void Game::draw()
 
     //Vector2<double> surfacePosition = Vector2<double>(lander.getPosition().x - windowWidth / 2, lander.getPosition().y + windowHeight / 2);
     Vector2<double> surfacePosition;
-    surfacePosition.x = (int)(lander.getPosition().x / 65563.0) * 65563.0;
+    surfacePosition.x = (int)(lander->getPosition().x / 65563.0) * 65563.0;
 
     surfacePosition.y = 0;
     //std::cout << surfacePosition.x << " " << surfacePosition.y << "\n";
     surfaceGenerator.drawSurface(window, surfacePosition);
 
-    lander.draw(window, &textures, phase);
+    lander->draw(window, &textures, phase);
 
     if (phase == MENU)
     {
@@ -235,7 +237,7 @@ void Game::draw()
     {
         int maxZoom = 75; int minZoom =  2;
         int maxAlt = 15000; int minAlt = 0;
-        zoomGoal = ((lander.getAltitude() - minAlt) / (maxAlt - minAlt)) * (maxZoom - minZoom);
+        zoomGoal = ((lander->getAltitude() - minAlt) / (maxAlt - minAlt)) * (maxZoom - minZoom);
         zoomGoal = zoomGoal < minZoom ? minZoom : zoomGoal;
         zoomGoal = zoomGoal > maxZoom ? maxZoom : zoomGoal;
 
@@ -262,7 +264,7 @@ void Game::draw()
         attitudeLM.setScale(zoom, zoom);
         attitudeLM.setColor(Color(0, 200, 0, hudtransparency));
         attitudeLM.setOrigin(Vector2f(80, 80));
-        attitudeLM.setRotation(lander.getRotation());
+        attitudeLM.setRotation(lander->getRotation());
         window->draw(attitudeLM);
 
         Sprite thrustText;
@@ -278,11 +280,11 @@ void Game::draw()
         thrustBar.setFillColor(Color(0, 0, 0, 0));
         thrustBar.setOutlineColor(Color(0, 200, 0, hudtransparency));
         thrustBar.setOutlineThickness(1);
-        thrustBar.setSize(Vector2f(lander.getThrottle() / 10.0 * 92, 9));
+        thrustBar.setSize(Vector2f(lander->getThrottle() / 10.0 * 92, 9));
         window->draw(thrustBar);
 
         Sprite altitudeLM;
-        double lmOffset = -170 + (lander.getAltitude() / 15000) * 533;
+        double lmOffset = -170 + (lander->getAltitude() / 15000) * 533;
         lmOffset = lmOffset < -170 ? -170 : lmOffset;
         lmOffset = lmOffset > 363 ? 363 : lmOffset;
         altitudeLM.setTexture(textures.at(5));
@@ -295,7 +297,7 @@ void Game::draw()
 
     if (phase == LANDED)
     {
-        DeathCause deathCause = lander.getDeathCause();
+        DeathCause deathCause = lander->getDeathCause();
         std::cout << "drawing texture " << 10 + (int)deathCause << ", death cause: " << deathCause << "\n";
         Sprite resultText;
         resultText.setTexture(textures.at(10 + (int)deathCause));
@@ -329,17 +331,24 @@ void Game::draw()
 
 void Game::resetGame()
 {
-    /*Lander newLander;
+    //delete &lander;
+    lander = new Lander();
     LanderSettings landerSettings;
     landerSettings.position = Vector2<double>(16 * 2048, -32000);
     landerSettings.velocity = Vector2<double>(1, 0);
     landerSettings.speed = 1150;
     landerSettings.sfx = &sfx;
-    newLander.init(landerSettings);
+    lander->init(landerSettings);
 
-    lander = newLander;
+    phase = MENU;
 
-    phase = MENU;*/
+    viewPosOffset = Vector2f(500, 300);
+    zoom = STARTZOOM;
+    zoomGoal = STARTZOOM;
+
+    goTrack = 21 + randomint(0, 1) * 2;
+
+    mission++;
 }
 
 bool Game::isWindowOpen()

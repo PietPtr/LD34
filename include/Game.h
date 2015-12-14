@@ -72,7 +72,7 @@ class Game
 
         //----
 
-        Lander lander;
+        Lander* lander;
         SurfaceGenerator surfaceGenerator;
 
         int phase = MENU;
