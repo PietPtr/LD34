@@ -60,6 +60,7 @@ int Lander::phaseOrbit()
 
     position.x = position.x + velocity.x * speed * dt;
     position.y = position.y + velocity.y * speed * dt;
+    std::cout << "this should not appear doring landing\n";
 
     if (Keyboard::isKeyPressed(Keyboard::Left)  || Keyboard::isKeyPressed(Keyboard::A))
         angularMomentum -= 4;
@@ -86,29 +87,33 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
     // Forces
 
     //gravitationForce = calcGravitationForce();
-    gravitation = normalize(Vector2<double>(0, 1)) * calcGravitationForce();
+    gravitation = normalize(Vector2<double>(0, 1)) * calcGravitationForce(); // better safe than sorry
+                                                                             // - marien, 2015
 
-    thrust.x = cos(rotation * (PI/180) - 0.5 * PI);
-    thrust.y = sin(rotation * (PI/180) - 0.5 * PI);
+    thrust.x = cos(rotation * (PI/180) - 0.5 * PI) * rocketPower;
+    thrust.y = sin(rotation * (PI/180) - 0.5 * PI) * rocketPower;
 
-    Vector2<double> Fsum = gravitation + thrust * rocketPower;
+    Vector2<double> Fsum = gravitation + thrust;
 
     // Acceleration
 
     acceleration = Fsum / mass;
 
-    double accLength = sqrt(pow(acceleration.x, 2) + pow(acceleration.y, 2));
-    Vector2<double> normalizedAcceleration = Vector2<double>(acceleration.x / accLength, acceleration.y / accLength);
+    //double accLength = sqrt(pow(acceleration.x, 2) + pow(acceleration.y, 2));
+    //Vector2<double> normalizedAcceleration = Vector2<double>(acceleration.x / accLength, acceleration.y / accLength);
 
-    speed = speed + accLength * dt;
+    //speed = speed + accLength * dt;
+    velocity += acceleration * dt;
 
-    Vector2<double> velocityAndAcceleration = velocity * speed + normalizedAcceleration * accLength;
-    velocity = normalize(velocityAndAcceleration);
+    //Vector2<double> velocityAndAcceleration = velocity * speed + normalizedAcceleration * accLength;
+    //velocity = normalize(velocityAndAcceleration);
 
     // Position
 
-    position.x = position.x + velocity.x * speed * dt;
-    position.y = position.y + velocity.y * speed * dt;
+    position += velocity * dt;
+
+    //position.x = position.x + velocity.x * speed * dt;
+    //position.y = position.y + velocity.y * speed * dt;
 
     // Rotation
 
@@ -125,7 +130,7 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
 
     altitude = -position.y - surfaceGenerator->getHeight(position.x);
 
-    double previousThrottle = throttle;
+    /*double previousThrottle = throttle;
     if (altitude < 4000)
         throttle = 2.0;
     if (altitude < 2000)
@@ -139,7 +144,7 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
     if (altitude < 0)
         throttle = 0;
     if (altitude >= 4000)
-        throttle = 1.0;
+        throttle = 1.0;*/
 
     //std::cout << previousThrottle << " " << throttle << "\n";
 

@@ -20,9 +20,9 @@ void Game::initialize()
     lander = new Lander();
 
     LanderSettings landerSettings;
-    landerSettings.position = Vector2<double>(16 * 2048, -32000);
-    landerSettings.velocity = Vector2<double>(1, 0);
-    landerSettings.speed = 1150;
+    landerSettings.position = Vector2<double>(16 * 2048, -42000);
+    landerSettings.velocity = Vector2<double>(1150, 0);
+    //landerSettings.speed = 1150;
     landerSettings.sfx = &sfx;
     lander->init(landerSettings);
 
@@ -138,6 +138,8 @@ void Game::update()
     double viewLanderOffset = maxOffset + 20000 / lander->getPosition().y * maxOffset;
     viewLanderOffset = (viewLanderOffset > maxOffset ? maxOffset : viewLanderOffset);
 
+    double zoomSpeed = 0.1;
+
     if (phase == MENU)
     {
         viewPos.x = viewPos.x + viewPosOffset.x * zoom;
@@ -145,6 +147,8 @@ void Game::update()
     }
     else if (phase == ORBIT)
     {
+        zoomSpeed = 0.3;
+
         if (lastPhase == MENU)
             sfx.at(goTrack)->play();
             //sfx.at(20 + randint(0, 1, (int)(totalTime.asSeconds())) * 2 + 1)->play();
@@ -169,12 +173,13 @@ void Game::update()
         viewPos = (Vector2f)(lander->getTouchdownPos());
     }
 
-    if (abs(zoom - zoomGoal) < 0.1)
+
+    if (abs(zoom - zoomGoal) < zoomSpeed)
         zoom = zoomGoal;
     if (zoom < zoomGoal)
-        zoom += 0.1;
+        zoom += zoomSpeed;
     if (zoom > zoomGoal)
-        zoom -= 0.1;
+        zoom -= zoomSpeed;
 
     lastPhase = phase;
 
@@ -239,6 +244,7 @@ void Game::draw()
         zoomGoal = ((lander->getAltitude() - minAlt) / (maxAlt - minAlt)) * (maxZoom - minZoom);
         zoomGoal = zoomGoal < minZoom ? minZoom : zoomGoal;
         zoomGoal = zoomGoal > maxZoom ? maxZoom : zoomGoal;
+        std::cout << zoomGoal << " " << zoom << "\n";
 
         //metres
         Sprite altitudeMeter;

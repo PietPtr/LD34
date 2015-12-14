@@ -39,7 +39,7 @@ class Game
     private:
         RenderWindow* window;
         View view;
-        const double STARTZOOM = 40;
+        const double STARTZOOM = 4;
         double zoom = STARTZOOM;
         double zoomGoal = STARTZOOM;
 
