@@ -53,7 +53,7 @@ class Lander
         Vector2i hitpoints[2];
         double speed;                 // in meters per second
         double gravitationForce;
-        double rotation = 225;
+        double rotation = 90;
         double angularMomentum = 0;
         double mass = 15200; // kg
         double dt;

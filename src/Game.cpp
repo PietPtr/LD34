@@ -20,7 +20,7 @@ void Game::initialize()
     lander = new Lander();
 
     LanderSettings landerSettings;
-    landerSettings.position = Vector2<double>(16 * 2048, -28000);
+    landerSettings.position = Vector2<double>(16 * 2048, -32000);
     landerSettings.velocity = Vector2<double>(1, 0);
     landerSettings.speed = 1150;
     landerSettings.sfx = &sfx;
@@ -239,16 +239,27 @@ void Game::draw()
         zoomGoal = ((lander->getAltitude() - minAlt) / (maxAlt - minAlt)) * (maxZoom - minZoom);
         zoomGoal = zoomGoal < minZoom ? minZoom : zoomGoal;
         zoomGoal = zoomGoal > maxZoom ? maxZoom : zoomGoal;
-        std::cout << zoomGoal << " zoom goal\n";
 
         //metres
         Sprite altitudeMeter;
         altitudeMeter.setTexture(textures.at(4));
-        altitudeMeter.setPosition(viewPos + Vector2f(windowWidth / 2.0, -windowHeight / 2.0) * (float)zoom);
+        altitudeMeter.setPosition(viewPos + Vector2f(windowWidth / 2.0, -windowHeight / 2.0 + 2) * (float)zoom);
         altitudeMeter.setScale(zoom, zoom);
         altitudeMeter.setColor(Color(0, 200, 0, hudtransparency));
-        altitudeMeter.setOrigin(Vector2f(50, -2));
+        altitudeMeter.setOrigin(Vector2f(50, 0));
         window->draw(altitudeMeter);
+
+        Sprite altitudeLM;
+        int maxOffset = 534;
+        double lmOffset = maxOffset - (lander->getAltitude() / 15000) * maxOffset;
+        lmOffset = lmOffset < 0 ? 0 : lmOffset;
+        lmOffset = lmOffset > maxOffset ? maxOffset : lmOffset;
+        altitudeLM.setTexture(textures.at(5));
+        altitudeLM.setPosition(viewPos + Vector2f(windowWidth / 2.0, -windowHeight / 2.0 + 2 + lmOffset) * (float)zoom);
+        altitudeLM.setScale(zoom, zoom);
+        altitudeLM.setColor(Color(0, 200, 0, hudtransparency));
+        altitudeLM.setOrigin(46, 0);
+        window->draw(altitudeLM);
 
         Sprite attitudeMeter;
         attitudeMeter.setTexture(textures.at(6));
@@ -283,16 +294,7 @@ void Game::draw()
         thrustBar.setSize(Vector2f(lander->getThrottle() / 10.0 * 92, 9));
         window->draw(thrustBar);
 
-        Sprite altitudeLM;
-        double lmOffset = -170 + (lander->getAltitude() / 15000) * 533;
-        lmOffset = lmOffset < -170 ? -170 : lmOffset;
-        lmOffset = lmOffset > 363 ? 363 : lmOffset;
-        altitudeLM.setTexture(textures.at(5));
-        altitudeLM.setPosition(viewPos + Vector2f(windowWidth / 2.0, -lmOffset) * (float)zoom);
-        altitudeLM.setScale(zoom, zoom);
-        altitudeLM.setColor(Color(0, 200, 0, hudtransparency));
-        altitudeLM.setOrigin(46, 0);
-        window->draw(altitudeLM);
+
     }
 
     if (phase == LANDED)
@@ -330,6 +332,11 @@ void Game::draw()
 
 void Game::resetGame()
 {
+    if (lander->getDeathCause() == ALIVE)
+        sfx.at(2)->stop();
+    else
+        sfx.at(19)->stop();
+
     //delete &lander;
     lander = new Lander();
     LanderSettings landerSettings;
@@ -346,7 +353,7 @@ void Game::resetGame()
     zoom = STARTZOOM;
     zoomGoal = STARTZOOM;
 
-    goTrack = 21 + randomint(0, 1) * 2;
+    goTrack = 20 + randomint(0, 1) * 2;
 
     mission++;
 }

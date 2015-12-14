@@ -31,6 +31,8 @@ int Lander::update(double dt, double totalTime, int phase, SurfaceGenerator* sur
 
     altitude = -position.y - surfaceGenerator->getHeight(position.x);
 
+    printVector(acceleration, "acceleration");
+    printVector(velocity * speed, "velocity");
 
     if (phase == 0)
         return phaseMenu();
@@ -41,6 +43,8 @@ int Lander::update(double dt, double totalTime, int phase, SurfaceGenerator* sur
     else if (phase == 3)
         return phaseTouchdown(surfaceGenerator);
     return -1;
+
+
 }
 
 int Lander::phaseMenu()
@@ -81,8 +85,8 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
 
     // Forces
 
-    gravitationForce = calcGravitationForce();
-    gravitation = normalize(Vector2<double>(0, 1)) * gravitationForce;
+    //gravitationForce = calcGravitationForce();
+    gravitation = normalize(Vector2<double>(0, 1)) * calcGravitationForce();
 
     thrust.x = cos(rotation * (PI/180) - 0.5 * PI);
     thrust.y = sin(rotation * (PI/180) - 0.5 * PI);
@@ -96,9 +100,9 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
     double accLength = sqrt(pow(acceleration.x, 2) + pow(acceleration.y, 2));
     Vector2<double> normalizedAcceleration = Vector2<double>(acceleration.x / accLength, acceleration.y / accLength);
 
-    speed += accLength * dt;
+    speed = speed + accLength * dt;
 
-    Vector2<double> velocityAndAcceleration = velocity * speed + acceleration;
+    Vector2<double> velocityAndAcceleration = velocity * speed + normalizedAcceleration * accLength;
     velocity = normalize(velocityAndAcceleration);
 
     // Position
@@ -129,7 +133,7 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
     if (altitude < 1000)
         throttle = 3.0;
     if (altitude < 500)
-        throttle = 6.0;
+        throttle = 5.0;
     if (altitude < 100 && altitude > 0)
         throttle = altitude / 100;
     if (altitude < 0)
@@ -250,17 +254,20 @@ int Lander::checkLanded(SurfaceGenerator* surfaceGenerator)
 
             position.y -= belowSurface;
 
-
             throttle = 0;
+            //if ()
 
-            if ((int)rotation % 360 > 320 || (int)rotation % 360 < 40)
+            if ((int)rotation % 360 > 320 || (int)rotation % 360 < 40 && deathCause == ALIVE)
                 deathCause = ALIVE;
             else if ((int)rotation % 360 > 270 || (int)rotation % 360 < 90)
                 deathCause = STEEP;
             else
                 deathCause = UPSIDE_DOWN;
 
-
+            if (deathCause == ALIVE)
+                sfx->at(1)->play();
+            else
+                sfx->at(19)->play();
 
             return 3;
         }
@@ -414,10 +421,16 @@ void Lander::draw(RenderWindow* window, std::vector<Texture>* textures, int phas
                 Sprite lmFragment;
                 lmFragment.setTexture(textures->at(0));
                 lmFragment.setTextureRect(IntRect(x, y, stepSize, stepSize));
-                lmFragment.setPosition(explosionPos + Vector2f((x - 128) * (explodeFactor),
-                                                               (y - 128) * (explodeFactor)));
+
+                Vector2f fragmentOffset;
+                double cs = cos(rotation * (PI/180));
+                double sn = sin(rotation * (PI/180));
+                fragmentOffset.x = ((x - 128) * explodeFactor) * cs - ((y - 128) * explodeFactor) * sn;
+                fragmentOffset.y = ((x - 128) * explodeFactor) * sn + ((y - 128) * explodeFactor) * cs;
+
+                lmFragment.setPosition(explosionPos + fragmentOffset);
+                lmFragment.setRotation(rotation);
                 window->draw(lmFragment);
-                std::cout << x << "," << y << "\n";
             }
         }
     }
