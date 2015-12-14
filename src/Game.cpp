@@ -22,12 +22,9 @@ void Game::initialize()
     landerSettings.velocity = Vector2<double>(1, 0);
     landerSettings.speed = 1150;
     landerSettings.sfx = &sfx;
-    std::cout << &sfx << " &sfx\n";
-    std::cout << landerSettings.sfx << " landerSettings.sfx\n";
     lander.init(landerSettings);
 
     mission = 16;//randint(11, 17);
-    std::cout << "The mission is Apollo " << mission << "\n";
 
     surfaceGenerator.init(mission);
 
@@ -66,14 +63,29 @@ void Game::update()
                 choice = !choice;
             if (event.key.code == Keyboard::Return)
             {
-                if (choice)
+                if (phase == MENU)
                 {
-                    window->close();
+                    if (choice)
+                    {
+                        window->close();
+                    }
+                    else
+                    {
+                        phase = 1;
+                    }
                 }
-                else
+                else if (phase == LANDED)
                 {
-                    phase = 1;
+                    if (choice)
+                    {
+                        window->close();
+                    }
+                    else
+                    {
+                        resetGame();
+                    }
                 }
+
             }
         }
         if (event.type == Event::Resized)
@@ -191,15 +203,15 @@ void Game::draw()
     {
         Sprite menuSprite;
         menuSprite.setTexture(textures.at(2));
-        menuSprite.setPosition(viewPos);
+        menuSprite.setPosition(viewPos + Vector2f(0, -128) * (float)zoom);
         menuSprite.setScale(zoom, zoom);
-        menuSprite.setOrigin(128, 128);
+        menuSprite.setOrigin(44, 0);
         menuSprite.setColor(Color(0, 200, 0));
         window->draw(menuSprite);
 
         Sprite selectSprite;
         selectSprite.setTexture(textures.at(3));
-        selectSprite.setPosition(viewPos + Vector2f(-128 * zoom, (-128 + choice * 96) * zoom));
+        selectSprite.setPosition(viewPos + Vector2f(-4 * zoom, (-128 + choice * 38) * zoom));
         selectSprite.setScale(zoom, zoom);
         selectSprite.setOrigin(64, 0);
         selectSprite.setColor(Color(0, 200, 0));
@@ -287,16 +299,47 @@ void Game::draw()
         std::cout << "drawing texture " << 10 + (int)deathCause << ", death cause: " << deathCause << "\n";
         Sprite resultText;
         resultText.setTexture(textures.at(10 + (int)deathCause));
-        resultText.setOrigin((Vector2f)(textures.at(10 + (int)deathCause).getSize() / (unsigned)2));
-        resultText.setPosition(viewPos);
+        resultText.setOrigin(Vector2f(textures.at(10 + (int)deathCause).getSize().x / 2, 0));
+        resultText.setPosition(viewPos + Vector2f(0, -windowHeight / 2.0 + 128) * (float)zoom);
         resultText.setScale(zoom, zoom);
         resultText.setColor(hudColor);
         window->draw(resultText);
 
+
+        Sprite menuSprite;
+        menuSprite.setTexture(textures.at(13));
+        menuSprite.setPosition(viewPos + Vector2f(0, -128) * (float)zoom);
+        menuSprite.setScale(zoom, zoom);
+        menuSprite.setOrigin(108, 0);
+        menuSprite.setColor(Color(0, 200, 0));
+        window->draw(menuSprite);
+
+        Sprite selectSprite;
+        selectSprite.setTexture(textures.at(3));
+        selectSprite.setPosition(viewPos + Vector2f(-68 * zoom, (-134 + choice * 38) * zoom));
+        selectSprite.setScale(zoom, zoom);
+        selectSprite.setOrigin(64, 0);
+        selectSprite.setColor(Color(0, 200, 0));
+        window->draw(selectSprite);
     }
 
 
     window->display();
+}
+
+void Game::resetGame()
+{
+    /*Lander newLander;
+    LanderSettings landerSettings;
+    landerSettings.position = Vector2<double>(16 * 2048, -32000);
+    landerSettings.velocity = Vector2<double>(1, 0);
+    landerSettings.speed = 1150;
+    landerSettings.sfx = &sfx;
+    newLander.init(landerSettings);
+
+    lander = newLander;
+
+    phase = MENU;*/
 }
 
 bool Game::isWindowOpen()

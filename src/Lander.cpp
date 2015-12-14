@@ -164,25 +164,29 @@ int Lander::phaseTouchdown(SurfaceGenerator* surfaceGenerator)
     if (rotation > 360 - touchdownSlope)
         rotation -= 1;*/
 
-    double cs = cos(rotation * (PI/180));
-    double sn = sin(rotation * (PI/180));
-    double tcs = cos(touchdownAngle * (PI/180));
-    double tsn = sin(touchdownAngle * (PI/180));
-    if (touchdownStrut == 0)
+    if (deathCause == ALIVE)
     {
-        hitpoints[1].x = -120 * tcs - 126 * tsn + (240 * cs - 0 * sn);
-        hitpoints[1].y = -120 * tsn + 126 * tcs + (240 * sn + 0 * cs);
-    }
-    if (touchdownStrut == 1)
-    {
-        hitpoints[0].x = 120 * tcs - 126 * tsn + (-240 * cs - 0 * sn);
-        hitpoints[0].y = 120 * tsn + 126 * tcs + (-240 * sn + 0 * cs);
+        double cs = cos(rotation * (PI/180));
+        double sn = sin(rotation * (PI/180));
+        double tcs = cos(touchdownAngle * (PI/180));
+        double tsn = sin(touchdownAngle * (PI/180));
+        if (touchdownStrut == 0)
+        {
+            hitpoints[1].x = -120 * tcs - 126 * tsn + (240 * cs - 0 * sn);
+            hitpoints[1].y = -120 * tsn + 126 * tcs + (240 * sn + 0 * cs);
+        }
+        if (touchdownStrut == 1)
+        {
+            hitpoints[0].x = 120 * tcs - 126 * tsn + (-240 * cs - 0 * sn);
+            hitpoints[0].y = 120 * tsn + 126 * tcs + (-240 * sn + 0 * cs);
+        }
+
+        if (touchdownStrut == 0 && checkCollision(hitpoints[1], surfaceGenerator) == -1)
+            rotation += fabs(angularMomentum * dt);
+        if (touchdownStrut == 1 && checkCollision(hitpoints[0], surfaceGenerator) == -1)
+            rotation -= fabs(angularMomentum * dt);
     }
 
-    if (touchdownStrut == 0 && checkCollision(hitpoints[1], surfaceGenerator) == -1)
-        rotation += fabs(angularMomentum * dt);
-    if (touchdownStrut == 1 && checkCollision(hitpoints[0], surfaceGenerator) == -1)
-        rotation -= fabs(angularMomentum * dt);
 
     return 3;
 }
@@ -240,7 +244,7 @@ int Lander::checkLanded(SurfaceGenerator* surfaceGenerator)
             touchdownStrut = i;
             touchdownAngle = rotation;
             touchdownPos = position;
-            if (angularMomentum < 30)
+            if (abs(angularMomentum) < 30)
                 angularMomentum = 30;
 
             position.y -= belowSurface;

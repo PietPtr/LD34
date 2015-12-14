@@ -29,6 +29,7 @@ class Game
         void update();
         void draw();
         bool isWindowOpen();
+        void resetGame();
 
         void loadAudio(std::vector<std::string> fileNames);
         void loadTextures(std::vector<std::string> fileNames);
@@ -64,7 +65,7 @@ class Game
         std::vector<std::string> textureFileNames { "lander.png", "booster.png", "menu.png", "select.png",              //0 1 2 3
                                                   "altitude.png", "altitude-LM.png", "attitude.png", "attitude-LM.png", //4 5 6 7
                                                   "thrust.png", "tutorial.png", "landed.png", "steep.png",              //8 9 10 11
-                                                  "upside-down.png" };            // 12
+                                                  "upside-down.png", "gameover-menu.png" };            // 12 13
 
         std::vector<Audio*> sfx;
         std::vector<Texture> textures;
