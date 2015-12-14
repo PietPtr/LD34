@@ -147,9 +147,13 @@ void Game::update()
         if (sfx.at(goTrack)->sound.getStatus() == 0)
             phase = DEORBIT;
     }
-    else if (phase == LANDED || phase == DEORBIT)
+    else if (phase == DEORBIT)
     {
         viewPos = lander.getPosition();
+    }
+    else if (phase == LANDED)
+    {
+        viewPos = (Vector2f)(lander.getTouchdownPos());
     }
 
     if (abs(zoom - zoomGoal) < 0.1)
@@ -158,8 +162,6 @@ void Game::update()
         zoom += 0.1;
     if (zoom > zoomGoal)
         zoom -= 0.1;
-
-    std::cout << zoomGoal << "\n";
 
     lastPhase = phase;
 
@@ -183,6 +185,8 @@ void Game::draw()
     //std::cout << surfacePosition.x << " " << surfacePosition.y << "\n";
     surfaceGenerator.drawSurface(window, surfacePosition);
 
+    lander.draw(window, &textures, phase);
+
     if (phase == MENU)
     {
         Sprite menuSprite;
@@ -202,6 +206,17 @@ void Game::draw()
         window->draw(selectSprite);
 
         zoomGoal = STARTZOOM;
+    }
+
+    if (phase == ORBIT)
+    {
+        Sprite tutorialSprite;
+        tutorialSprite.setTexture(textures.at(9));
+        tutorialSprite.setPosition(viewPos + Vector2f(0, -windowHeight / 2.0 + 4) * (float)zoom);
+        tutorialSprite.setColor(hudColor);
+        tutorialSprite.setScale(zoom, zoom);
+        tutorialSprite.setOrigin(230, 0);
+        window->draw(tutorialSprite);
     }
 
     if (phase == DEORBIT || phase == ORBIT || phase == LANDED)
@@ -266,12 +281,20 @@ void Game::draw()
         window->draw(altitudeLM);
     }
 
-    if (phase == DEORBIT)
+    if (phase == LANDED)
     {
+        DeathCause deathCause = lander.getDeathCause();
+        std::cout << "drawing texture " << 10 + (int)deathCause << ", death cause: " << deathCause << "\n";
+        Sprite resultText;
+        resultText.setTexture(textures.at(10 + (int)deathCause));
+        resultText.setOrigin((Vector2f)(textures.at(10 + (int)deathCause).getSize() / (unsigned)2));
+        resultText.setPosition(viewPos);
+        resultText.setScale(zoom, zoom);
+        resultText.setColor(hudColor);
+        window->draw(resultText);
 
     }
 
-    lander.draw(window, &textures, phase);
 
     window->display();
 }

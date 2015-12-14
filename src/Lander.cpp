@@ -31,6 +31,7 @@ int Lander::update(double dt, int phase, SurfaceGenerator* surfaceGenerator)
 
     altitude = -position.y - surfaceGenerator->getHeight(position.x);
 
+
     if (phase == 0)
         return phaseMenu();
     else if (phase == 1)
@@ -147,7 +148,7 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
 
     if (Keyboard::isKeyPressed(Keyboard::S))
         position.y = -32000;
-    //throttle = 0;
+    throttle = 0;
 
     return 2;
 }
@@ -178,9 +179,9 @@ int Lander::phaseTouchdown(SurfaceGenerator* surfaceGenerator)
         hitpoints[0].y = 120 * tsn + 126 * tcs + (-240 * sn + 0 * cs);
     }
 
-    if (touchdownStrut == 0 && !checkCollision(hitpoints[1], surfaceGenerator))
+    if (touchdownStrut == 0 && checkCollision(hitpoints[1], surfaceGenerator) == -1)
         rotation += fabs(angularMomentum * dt);
-    if (touchdownStrut == 1 && !checkCollision(hitpoints[0], surfaceGenerator))
+    if (touchdownStrut == 1 && checkCollision(hitpoints[0], surfaceGenerator) == -1)
         rotation -= fabs(angularMomentum * dt);
 
     return 3;
@@ -231,19 +232,29 @@ int Lander::checkLanded(SurfaceGenerator* surfaceGenerator)
 
     for (int i = 0; i < 2; i++)
     {
-        if (checkCollision(hitpoints[i], surfaceGenerator))
+        belowSurface = checkCollision(hitpoints[i], surfaceGenerator);
+        std::cout << belowSurface << "\n";
+
+        if (belowSurface != -1)
         {
             touchdownStrut = i;
             touchdownAngle = rotation;
+            touchdownPos = position;
             if (angularMomentum < 30)
                 angularMomentum = 30;
 
+            position.y -= belowSurface;
+
             throttle = 0;
 
-            if ((int)rotation % 360 > 270 || (int)rotation % 360 < 90)
-                (*sfx).at(2)->play();
+            if ((int)rotation % 360 > 320 || (int)rotation % 360 < 40)
+                deathCause = ALIVE;
+            else if ((int)rotation % 360 > 270 || (int)rotation % 360 < 90)
+                deathCause = STEEP;
             else
-                (*sfx).at(19)->play();
+                deathCause = UPSIDE_DOWN;
+
+
 
             return 3;
         }
@@ -297,7 +308,7 @@ int Lander::checkLanded(SurfaceGenerator* surfaceGenerator)
     return 0;
 }
 
-bool Lander::checkCollision(Vector2i hitpoint, SurfaceGenerator* surfaceGenerator)
+double Lander::checkCollision(Vector2i hitpoint, SurfaceGenerator* surfaceGenerator)
 {
     Vector2<double> pos;
     /*if (phase == 3 && touchdownStrut == 0)
@@ -344,9 +355,9 @@ bool Lander::checkCollision(Vector2i hitpoint, SurfaceGenerator* surfaceGenerato
 
         //if (rotation != 360 - hillAngle)
 
-        return true;
+        return (a * x1 + b) - (-pos.y - hitpoint.y);
     }
-    return false;
+    return -1;
 }
 
 void Lander::draw(RenderWindow* window, std::vector<Texture>* textures, int phase)

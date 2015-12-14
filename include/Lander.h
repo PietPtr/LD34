@@ -14,6 +14,13 @@ struct LanderSettings
     std::vector<Audio*>* sfx;
 };
 
+enum DeathCause
+{
+    ALIVE,
+    STEEP,
+    UPSIDE_DOWN,
+};
+
 class Lander
 {
     public:
@@ -27,13 +34,15 @@ class Lander
         int  checkLanded(SurfaceGenerator* surfaceGenerator);
         void playAtmosphericSound();
         void draw(RenderWindow* window, std::vector<Texture>* textures, int phase);
-        bool checkCollision(Vector2i hitpoint, SurfaceGenerator* surfaceGenerator);
+        double checkCollision(Vector2i hitpoint, SurfaceGenerator* surfaceGenerator);
         double calcGravitationForce();
         bool isSoundPlaying();
         Vector2f getPosition() { return (Vector2f)(position); }
         double getAltitude() { return altitude; }
         double getRotation() { return rotation; }
-        double getThrottle() { return throttle;}
+        double getThrottle() { return throttle; }
+        Vector2<double> getTouchdownPos() { return touchdownPos; }
+        DeathCause getDeathCause() { return deathCause; }
     protected:
     private:
         Vector2<double> acceleration; // m/s^2
@@ -44,7 +53,7 @@ class Lander
         Vector2i hitpoints[2];
         double speed;                 // in meters per second
         double gravitationForce;
-        double rotation = 0;
+        double rotation = 315;
         double angularMomentum = 0;
         double mass = 15200; // kg
         double dt;
@@ -56,9 +65,12 @@ class Lander
         double lastSoundPlayed = 0; // time
         double touchdownAngle = 0;
         int touchdownStrut = -1;
+        Vector2<double> touchdownPos;
         double stableRotation = 0;
         int phase;
         int heightSound = 0;
+        DeathCause deathCause = ALIVE;
+        double belowSurface = -1;
 
         LanderSettings settings;
         std::vector<Audio*>* sfx;

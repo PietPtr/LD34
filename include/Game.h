@@ -61,9 +61,10 @@ class Game
                                                   "50-feet.wav", "40-feet.wav", "houston-problem.wav",
                                                   "go-for-landing1.wav", "go-for-landing2.wav", "go-for-pdi1.wav",
                                                   "go-for-pdi2.wav" };
-        std::vector<std::string> textureFileNames { "lander.png", "booster.png", "menu.png", "select.png",
-                                                  "altitude.png", "altitude-LM.png", "attitude.png", "attitude-LM.png",
-                                                  "thrust.png" };
+        std::vector<std::string> textureFileNames { "lander.png", "booster.png", "menu.png", "select.png",              //0 1 2 3
+                                                  "altitude.png", "altitude-LM.png", "attitude.png", "attitude-LM.png", //4 5 6 7
+                                                  "thrust.png", "tutorial.png", "landed.png", "steep.png",              //8 9 10 11
+                                                  "upside-down.png" };            // 12
 
         std::vector<Audio*> sfx;
         std::vector<Texture> textures;
@@ -81,6 +82,8 @@ class Game
         int hudtransparency = 200;
 
         int goTrack = 21;
+
+        Color hudColor { 0, 200, 0, 200 };
 
         bool choice = false;
 };
