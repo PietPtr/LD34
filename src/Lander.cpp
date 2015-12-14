@@ -268,19 +268,26 @@ int Lander::checkLanded(SurfaceGenerator* surfaceGenerator)
             position.y -= belowSurface;
 
             throttle = 0;
-            //if ()
+            if (velocity.x > 150)
+                deathCause = VELOCITY;
+            if (velocity.y > 100)
+                deathCause = VELOCITY;
+            std::cout << deathCause << " death cause\n";
 
-            if ((int)rotation % 360 > 320 || (int)rotation % 360 < 40 && deathCause == ALIVE)
+            if (((int)rotation % 360 > 320 || (int)rotation % 360 < 40) && deathCause == ALIVE)
                 deathCause = ALIVE;
-            else if ((int)rotation % 360 > 270 || (int)rotation % 360 < 90)
+            else if (((int)rotation % 360 > 270 || (int)rotation % 360 < 90) && deathCause == ALIVE)
                 deathCause = STEEP;
-            else
+
+            else if (deathCause == ALIVE)
                 deathCause = UPSIDE_DOWN;
 
             if (deathCause == ALIVE)
                 sfx->at(1)->play();
             else
                 sfx->at(19)->play();
+
+            std::cout << deathCause << " death cause\n";
 
             return 3;
         }

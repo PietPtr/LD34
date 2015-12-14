@@ -244,7 +244,6 @@ void Game::draw()
         zoomGoal = ((lander->getAltitude() - minAlt) / (maxAlt - minAlt)) * (maxZoom - minZoom);
         zoomGoal = zoomGoal < minZoom ? minZoom : zoomGoal;
         zoomGoal = zoomGoal > maxZoom ? maxZoom : zoomGoal;
-        std::cout << zoomGoal << " " << zoom << "\n";
 
         //metres
         Sprite altitudeMeter;
@@ -316,7 +315,7 @@ void Game::draw()
 
 
         Sprite menuSprite;
-        menuSprite.setTexture(textures.at(13));
+        menuSprite.setTexture(textures.at(14));
         menuSprite.setPosition(viewPos + Vector2f(0, -128) * (float)zoom);
         menuSprite.setScale(zoom, zoom);
         menuSprite.setOrigin(108, 0);
