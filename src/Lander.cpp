@@ -40,8 +40,6 @@ int Lander::update(double dt, double totalTime, int phase, SurfaceGenerator* sur
     else if (phase == 3)
         return phaseTouchdown(surfaceGenerator);
     return -1;
-
-
 }
 
 int Lander::phaseMenu()
@@ -65,13 +63,6 @@ int Lander::phaseOrbit()
 
     rotation += angularMomentum * dt;
 
-    /*if ((*sfx).at(2)->sound.getStatus() == 0)
-    {
-        std::cout << "playing sound 2" << "\n";
-        (*sfx).at(2)->play();
-    }*/
-    //std::cout << (*sfx).at(2)->sound.getStatus() << "\n";
-
     return 1;
 }
 
@@ -88,7 +79,7 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
 
     //std::cout << "gravitation " << calcGravitationForce() << "\n";
 
-    rocketPower = sqrt(pow(velocity.x, 2) + pow(velocity.y, 2)) * (mass / 50);
+    rocketPower = sqrt(pow(velocity.x, 2) + pow(velocity.y, 2)) * (mass / 5);
     thrust.x = cos(rotation * (PI/180) - 0.5 * PI) * rocketPower;
     thrust.y = sin(rotation * (PI/180) - 0.5 * PI) * rocketPower;
 
@@ -206,16 +197,16 @@ void Lander::playAtmosphericSound()
     int altOrRand = randint(0, 1, altitude);
     if (altOrRand == 0)
     {
-        (*sfx).at(3 + randint(0, 5, altitude))->play();
+        (*sfx).at(3 + randint(0, 7, position.x + position.y))->play();
         std::cout << "playing sound " << 3 + randint(0, 5, altitude) << "\n";
         //(*sfx).at(6)->play();
     }
     else if (altOrRand = 1)
     {
-        (*sfx).at(9 + heightSound)->play();
+        (*sfx).at(11 + heightSound)->play();
         heightSound++;
     }
-    heightSound = heightSound > 9 ? 0 : heightSound;
+    heightSound = heightSound > 11 ? 0 : heightSound;
     std::cout << altOrRand << "\n";
 
     lastSoundPlayed = totalTime;
@@ -280,7 +271,7 @@ int Lander::checkLanded(SurfaceGenerator* surfaceGenerator)
             if (deathCause == ALIVE)
                 sfx->at(1)->play();
             else
-                sfx->at(19)->play();
+                sfx->at(25)->play();
 
             std::cout << deathCause << " death cause\n";
 

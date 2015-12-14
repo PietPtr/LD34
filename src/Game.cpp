@@ -109,7 +109,7 @@ void Game::update()
 
     if (frame == 1)
     {
-        goTrack = 21 + randomint(0, 1) * 2;
+        goTrack = 27 + randomint(0, 1) * 2;
     }
 
     //Manual view control
@@ -173,6 +173,16 @@ void Game::update()
         viewPos = (Vector2f)(lander->getTouchdownPos());
     }
 
+    horizontalWarning = lander->getVelocity().x < 150;
+    verticalWarning = lander->getVelocity().y < 150;
+
+    if (verticalWarning != lastVerticalWarning)
+        sfx.at(30)->play();
+    if (horizontalWarning != lastHorizontalWarning)
+        sfx.at(30)->play();
+
+    std::cout << horizontalWarning << " " << lastHorizontalWarning << "\n";
+
 
     if (abs(zoom - zoomGoal) < zoomSpeed)
         zoom = zoomGoal;
@@ -182,6 +192,8 @@ void Game::update()
         zoom -= zoomSpeed;
 
     lastPhase = phase;
+    lastHorizontalWarning = horizontalWarning;
+    lastVerticalWarning = verticalWarning;
 
     frame++;
 }
@@ -357,7 +369,6 @@ void Game::draw()
         window->draw(selectSprite);
     }
 
-
     window->display();
 }
 
@@ -366,14 +377,13 @@ void Game::resetGame()
     if (lander->getDeathCause() == ALIVE)
         sfx.at(2)->stop();
     else
-        sfx.at(19)->stop();
+        sfx.at(25)->stop();
 
     //delete &lander;
     lander = new Lander();
     LanderSettings landerSettings;
-    landerSettings.position = Vector2<double>(16 * 2048, -32000);
-    landerSettings.velocity = Vector2<double>(1, 0);
-    landerSettings.speed = 1150;
+    landerSettings.position = Vector2<double>(16 * 2048, -28000);
+    landerSettings.velocity = Vector2<double>(500, 0);
     landerSettings.sfx = &sfx;
     lander->init(landerSettings);
 
@@ -384,7 +394,7 @@ void Game::resetGame()
     zoom = STARTZOOM;
     zoomGoal = STARTZOOM;
 
-    goTrack = 20 + randomint(0, 1) * 2;
+    goTrack = 26 + randomint(0, 1) * 2;
 
     mission++;
 }
