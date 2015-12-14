@@ -20,7 +20,7 @@ void Game::initialize()
     lander = new Lander();
 
     LanderSettings landerSettings;
-    landerSettings.position = Vector2<double>(16 * 2048, -32000);
+    landerSettings.position = Vector2<double>(16 * 2048, -28000);
     landerSettings.velocity = Vector2<double>(500, 0);
     //landerSettings.speed = 1150;
     landerSettings.sfx = &sfx;

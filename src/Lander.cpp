@@ -89,8 +89,8 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
 
     //std::cout << "gravitation " << calcGravitationForce() << "\n";
 
-    rocketPower = 0;//maxThrust * throttle;
-    std::cout << rocketPower << "\n";
+    rocketPower = sqrt(pow(velocity.x, 2) + pow(velocity.y, 2)) * (mass / 50);
+    std::cout << "rocketpower: " << rocketPower << "\n";
     thrust.x = cos(rotation * (PI/180) - 0.5 * PI) * rocketPower;
     thrust.y = sin(rotation * (PI/180) - 0.5 * PI) * rocketPower;
 
