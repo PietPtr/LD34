@@ -79,7 +79,7 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
 
     //std::cout << "gravitation " << calcGravitationForce() << "\n";
 
-    rocketPower = sqrt(pow(velocity.x, 2) + pow(velocity.y, 2)) * (mass / 5);
+    rocketPower = sqrt(pow(velocity.x, 2) + pow(velocity.y, 2)) * (mass / 25);
     thrust.x = cos(rotation * (PI/180) - 0.5 * PI) * rocketPower;
     thrust.y = sin(rotation * (PI/180) - 0.5 * PI) * rocketPower;
 
@@ -147,10 +147,6 @@ int Lander::phaseDeorbit(SurfaceGenerator* surfaceGenerator)
 
     //std::cout << totalTime - lastSoundPlayed << "\n";
 
-    if (Keyboard::isKeyPressed(Keyboard::S))
-        position.y = -32000;
-    //throttle = 0;
-
     return 2;
 }
 
@@ -198,7 +194,6 @@ void Lander::playAtmosphericSound()
     if (altOrRand == 0)
     {
         (*sfx).at(3 + randint(0, 7, position.x + position.y))->play();
-        std::cout << "playing sound " << 3 + randint(0, 5, altitude) << "\n";
         //(*sfx).at(6)->play();
     }
     else if (altOrRand = 1)
@@ -207,7 +202,6 @@ void Lander::playAtmosphericSound()
         heightSound++;
     }
     heightSound = heightSound > 11 ? 0 : heightSound;
-    std::cout << altOrRand << "\n";
 
     lastSoundPlayed = totalTime;
 }
@@ -258,7 +252,6 @@ int Lander::checkLanded(SurfaceGenerator* surfaceGenerator)
                 deathCause = VELOCITY;
             if (velocity.y > 150)
                 deathCause = VELOCITY;
-            std::cout << deathCause << " death cause\n";
 
             if (((int)rotation % 360 > 320 || (int)rotation % 360 < 40) && deathCause == ALIVE)
                 deathCause = ALIVE;
@@ -269,11 +262,12 @@ int Lander::checkLanded(SurfaceGenerator* surfaceGenerator)
                 deathCause = UPSIDE_DOWN;
 
             if (deathCause == ALIVE)
-                sfx->at(1)->play();
+                sfx->at(2)->play();
             else
                 sfx->at(25)->play();
 
-            std::cout << deathCause << " death cause\n";
+            std::cout << "Touchdown velocity";
+            printVector(velocity, "");
 
             return 3;
         }

@@ -26,7 +26,8 @@ void Game::initialize()
     landerSettings.sfx = &sfx;
     lander->init(landerSettings);
 
-    mission = 16;//randint(11, 17);
+    mission = randomint(0, 100);
+    std::cout << "Moon seed: " << mission << "\n";
 
     surfaceGenerator.init(mission);
 
@@ -47,18 +48,6 @@ void Game::update()
         {
             if (event.key.code == Keyboard::Escape)
                 window->close();
-            if (event.key.code == Keyboard::Num1)
-                phase = MENU;
-            if (event.key.code == Keyboard::Num2)
-            {
-                phase = ORBIT;
-            }
-            if (event.key.code == Keyboard::Num3)
-                phase = DEORBIT;
-            if (event.key.code == Keyboard::Num4)
-                phase = LANDED;
-            if (event.key.code == Keyboard::Space)
-                sfx.at(0)->play();
             if (event.key.code == Keyboard::Up)
                 choice = !choice;
             if (event.key.code == Keyboard::Down)
@@ -95,13 +84,6 @@ void Game::update()
             windowWidth = event.size.width;
             windowHeight = event.size.height;
         }
-        if (event.type == Event::MouseWheelMoved)
-        {
-            if (event.mouseWheel.delta > 0)
-                zoom /= 1.1;
-            else
-                zoom *= 1.1;
-        }
     }
 
     frameTime = clock.restart();
@@ -111,18 +93,6 @@ void Game::update()
     {
         goTrack = 27 + randomint(0, 1) * 2;
     }
-
-    //Manual view control
-    double viewMoveSpeed = 20;
-    if (Keyboard::isKeyPressed(Keyboard::Home))
-        viewPos.y -= viewMoveSpeed;
-    if (Keyboard::isKeyPressed(Keyboard::End))
-        viewPos.y += viewMoveSpeed;
-    if (Keyboard::isKeyPressed(Keyboard::Delete))
-        viewPos.x -= viewMoveSpeed;
-    if (Keyboard::isKeyPressed(Keyboard::PageDown))
-        viewPos.x += viewMoveSpeed;
-
 
     double dt = frameTime.asSeconds() * 1;
 
@@ -180,9 +150,6 @@ void Game::update()
         sfx.at(30)->play();
     if (horizontalWarning != lastHorizontalWarning)
         sfx.at(30)->play();
-
-    std::cout << horizontalWarning << " " << lastHorizontalWarning << "\n";
-
 
     if (abs(zoom - zoomGoal) < zoomSpeed)
         zoom = zoomGoal;
